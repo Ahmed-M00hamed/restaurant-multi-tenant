@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
     --color-primary: #111827;
     --color-secondary: #f59e0b;
@@ -11,6 +13,71 @@
     --color-success: #16a34a;
     --color-danger: #dc2626;
 }
+
+/* ======================================================
+   الوضع الليلي — للوحة تحكم الأدمن فقط (مش لمنيو العميل،
+   لأن كل مطعم بيحدد ألوانه الخاصة في المنيو من الإعدادات)
+====================================================== */
+:root.dark {
+    --color-primary: #6366f1;
+    --color-secondary: #f59e0b;
+
+    --color-background: #0f172a;
+    --color-text: #e2e8f0;
+    --color-card: #1e293b;
+
+    --color-success: #22c55e;
+    --color-danger: #f87171;
+}
+
+.dark {
+    color-scheme: dark;
+}
+
+/* تحويل الألوان الثابتة (Tailwind) اللي مستخدمة في صفحات الأدمن
+   عشان تبقى متوافقة مع الوضع الليلي بدون ما نلمس كل عنصر */
+.dark .bg-white {
+    background-color: #1e293b;
+}
+
+.dark .bg-gray-50,
+.dark .bg-gray-100 {
+    background-color: #273449;
+}
+
+.dark .border-gray-200,
+.dark .border-gray-300 {
+    border-color: #334155;
+}
+
+.dark .text-gray-500,
+.dark .text-gray-600,
+.dark .text-gray-700,
+.dark .text-gray-800,
+.dark .text-gray-900 {
+    color: #cbd5e1;
+}
+
+.dark .bg-red-50 { background-color: #3f1d1d; }
+.dark .bg-red-100 { background-color: #4c2323; }
+.dark .bg-green-50 { background-color: #143424; }
+.dark .bg-green-100 { background-color: #17462d; }
+.dark .bg-blue-50 { background-color: #172a46; }
+.dark .bg-blue-100 { background-color: #1c355c; }
+.dark .bg-yellow-100 { background-color: #453a17; }
+.dark .bg-amber-50 { background-color: #453a17; }
+.dark .bg-orange-50 { background-color: #47301a; }
+.dark .bg-orange-100 { background-color: #58391f; }
+
+.dark .text-red-700,
+.dark .text-red-800 { color: #fca5a5; }
+.dark .text-green-700,
+.dark .text-green-800 { color: #86efac; }
+.dark .text-blue-700,
+.dark .text-blue-800 { color: #93c5fd; }
+.dark .text-yellow-800,
+.dark .text-amber-800 { color: #fcd34d; }
+.dark .text-orange-800 { color: #fdba74; }
 
 body {
     margin: 0;

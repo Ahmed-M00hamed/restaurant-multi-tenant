@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { useOutletContext } from "react-router-dom"
 import { supabase } from "../../lib/supabase"
 import { uploadBrandingImage } from "../../lib/image"
 import {
@@ -21,6 +22,9 @@ const OVERLAY_PRESETS = [
 import AdminDeliveryAreas from "./AdminDeliveryAreas"
 
 function AdminSettings() {
+    const { authData, restaurant } = useOutletContext() || {}
+    const restaurantId = authData?.restaurant_id || null
+
     const [settings, setSettings] = useState(null)
 
     const [loading, setLoading] = useState(true)
@@ -28,11 +32,14 @@ function AdminSettings() {
     const [uploading, setUploading] = useState(null)
 
     const loadSettings = async () => {
+        if (!restaurantId) return
+
         setLoading(true)
 
         const { data, error } = await supabase
             .from("restaurant_settings")
             .select("*")
+            .eq("restaurant_id", restaurantId)
             .limit(1)
             .maybeSingle()
 
@@ -44,7 +51,41 @@ function AdminSettings() {
         }
 
         if (!data) {
-            alert("لم يتم العثور على إعدادات المطعم.")
+            // مطعم جديد لسه مفيهوش صف إعدادات — بننشئ واحد بقيم افتراضية
+            const { data: created, error: createError } = await supabase
+                .from("restaurant_settings")
+                .insert({
+                    restaurant_id: restaurantId,
+                    restaurant_name: restaurant?.name || "",
+                    description: "",
+                    phone: "",
+                    address: "",
+                    logo_url: "",
+                    cover_url: null,
+                    header_color: null,
+                    header_opacity: null,
+                    is_open: true,
+                    closed_message: "المطعم مغلق حاليًا",
+                    delivery_enabled: true,
+                    pickup_enabled: true,
+                    dine_in_enabled: true,
+                    cash_payment_enabled: true,
+                    online_payment_enabled: false,
+                    primary_color: "#000000",
+                    background_color: "#f8f8f8",
+                    card_color: "#ffffff",
+                })
+                .select()
+                .single()
+
+            if (createError) {
+                console.error("Settings create error:", createError)
+                alert(createError.message)
+                setLoading(false)
+                return
+            }
+
+            setSettings(created)
             setLoading(false)
             return
         }
@@ -55,7 +96,7 @@ function AdminSettings() {
 
     useEffect(() => {
         loadSettings()
-    }, [])
+    }, [restaurantId])
 
     const updateField = (field, value) => {
         setSettings((current) => ({
@@ -103,6 +144,7 @@ function AdminSettings() {
                 updated_at: new Date().toISOString(),
             })
             .eq("id", settings.id)
+            .eq("restaurant_id", restaurantId)
 
         if (error) {
             console.error("Settings save error:", error)

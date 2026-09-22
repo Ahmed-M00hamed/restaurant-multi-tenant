@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { useOutletContext } from "react-router-dom"
 import { supabase } from "../../lib/supabase"
 import { ORDERS_CHANGED_EVENT } from "./useNewOrderAlerts"
 
@@ -164,6 +165,9 @@ const buildBuckets = (start, end) => {
 }
 
 function AdminDashboard() {
+    const { authData } = useOutletContext() || {}
+    const restaurantId = authData?.restaurant_id || null
+
     const [orders, setOrders] = useState([])
     const [loading, setLoading] = useState(true)
 
@@ -177,6 +181,8 @@ function AdminDashboard() {
 
     // silent = تحديث في الخلفية من غير شاشة "جاري التحميل"
     const loadDashboard = async (silent = false) => {
+        if (!restaurantId) return
+
         if (!silent) {
             setLoading(true)
         }
@@ -184,6 +190,7 @@ function AdminDashboard() {
         const { data, error } = await supabase
             .from("orders")
             .select("*")
+            .eq("restaurant_id", restaurantId)
             .order("created_at", { ascending: false })
 
         if (error) {
@@ -198,7 +205,7 @@ function AdminDashboard() {
 
     useEffect(() => {
         loadDashboard()
-    }, [])
+    }, [restaurantId])
 
     // تحديث تلقائي لما يوصل طلب جديد أو حالة طلب تتغير
     useEffect(() => {

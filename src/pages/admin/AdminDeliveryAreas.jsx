@@ -1,8 +1,12 @@
 
 import { useEffect, useRef, useState } from "react"
+import { useOutletContext } from "react-router-dom"
 import { supabase } from "../../lib/supabase"
 
 function AdminDeliveryAreas({ embedded = false }) {
+    const { authData } = useOutletContext() || {}
+    const restaurantId = authData?.restaurant_id || null
+
     const formRef = useRef(null)
     const [areas, setAreas] = useState([])
     const [loading, setLoading] = useState(true)
@@ -16,11 +20,14 @@ function AdminDeliveryAreas({ embedded = false }) {
     })
 
     const fetchAreas = async () => {
+        if (!restaurantId) return
+
         setLoading(true)
 
         const { data, error } = await supabase
             .from("delivery_areas")
             .select("*")
+            .eq("restaurant_id", restaurantId)
             .order("created_at", { ascending: false })
 
         if (error) {
@@ -35,7 +42,7 @@ function AdminDeliveryAreas({ embedded = false }) {
 
     useEffect(() => {
         fetchAreas()
-    }, [])
+    }, [restaurantId])
 
     const resetForm = () => {
         setEditingId(null)
@@ -78,10 +85,17 @@ function AdminDeliveryAreas({ embedded = false }) {
                 .from("delivery_areas")
                 .update(payload)
                 .eq("id", editingId)
+                .eq("restaurant_id", restaurantId)
         } else {
+            if (!restaurantId) {
+                alert("تعذر تحديد المطعم.")
+                setSaving(false)
+                return
+            }
+
             result = await supabase
                 .from("delivery_areas")
-                .insert(payload)
+                .insert({ ...payload, restaurant_id: restaurantId })
         }
 
         if (result.error) {
@@ -117,6 +131,7 @@ function AdminDeliveryAreas({ embedded = false }) {
                 is_active: !area.is_active,
             })
             .eq("id", area.id)
+            .eq("restaurant_id", restaurantId)
 
         if (error) {
             console.error("Toggle delivery area error:", error)
@@ -138,6 +153,7 @@ function AdminDeliveryAreas({ embedded = false }) {
             .from("delivery_areas")
             .delete()
             .eq("id", area.id)
+            .eq("restaurant_id", restaurantId)
 
         if (error) {
             console.error("Delete delivery area error:", error)

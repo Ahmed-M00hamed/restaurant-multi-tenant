@@ -1,9 +1,14 @@
 
 import { useEffect, useState } from "react"
+import { useOutletContext } from "react-router-dom"
 import QRCode from "react-qr-code"
 import { supabase } from "../../lib/supabase"
 
 function AdminTables() {
+    const { authData, restaurant } = useOutletContext() || {}
+    const restaurantId = authData?.restaurant_id || null
+    const restaurantSlug = restaurant?.slug || ""
+
     const [tables, setTables] = useState([])
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
@@ -27,11 +32,14 @@ function AdminTables() {
     // =========================
 
     const fetchTables = async () => {
+        if (!restaurantId) return
+
         setLoading(true)
 
         const { data, error } = await supabase
             .from("tables")
             .select("*")
+            .eq("restaurant_id", restaurantId)
             .order("table_number", { ascending: true })
 
         if (error) {
@@ -47,14 +55,14 @@ function AdminTables() {
 
     useEffect(() => {
         fetchTables()
-    }, [])
+    }, [restaurantId])
 
     // =========================
     // QR URL
     // =========================
 
     const getTableUrl = (tableNumber) => {
-        const url = new URL("/", window.location.origin)
+        const url = new URL(`/${restaurantSlug}`, window.location.origin)
 
         url.searchParams.set("table", tableNumber)
 
@@ -142,12 +150,19 @@ function AdminTables() {
                 .from("tables")
                 .update(payload)
                 .eq("id", editingTable.id)
+                .eq("restaurant_id", restaurantId)
 
             error = result.error
         } else {
+            if (!restaurantId) {
+                alert("تعذر تحديد المطعم.")
+                setSaving(false)
+                return
+            }
+
             const result = await supabase
                 .from("tables")
-                .insert(payload)
+                .insert({ ...payload, restaurant_id: restaurantId })
 
             error = result.error
         }
@@ -189,6 +204,7 @@ function AdminTables() {
             .from("tables")
             .delete()
             .eq("id", table.id)
+            .eq("restaurant_id", restaurantId)
 
         if (error) {
             console.error(error)
@@ -211,6 +227,7 @@ function AdminTables() {
                 is_active: !table.is_active,
             })
             .eq("id", table.id)
+            .eq("restaurant_id", restaurantId)
 
         if (error) {
             console.error(error)

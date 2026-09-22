@@ -14,12 +14,27 @@ import {
 } from "../../lib/branding"
 
 const SOUND_KEY = "menuflow_admin_sound"
+const THEME_KEY = "menuflow_admin_theme"
 
 const readSoundPreference = () => {
     try {
         return localStorage.getItem(SOUND_KEY) !== "off"
     } catch {
         return true
+    }
+}
+
+const readThemePreference = () => {
+    try {
+        const saved = localStorage.getItem(THEME_KEY)
+        if (saved === "dark") return true
+        if (saved === "light") return false
+        // مفيش تفضيل محفوظ: نتبع إعدادات النظام
+        return window.matchMedia?.(
+            "(prefers-color-scheme: dark)"
+        ).matches ?? false
+    } catch {
+        return false
     }
 }
 
@@ -117,32 +132,44 @@ function AdminLayout() {
     /* ---------- بيانات المطعم + مفتوح/مغلق ---------- */
     const [restaurant, setRestaurant] = useState({
         id: null,
+        slug: "",
+        settingsId: null,
         name: "",
         logo: "",
         isOpen: true,
     })
     const [togglingOpen, setTogglingOpen] = useState(false)
 
-    const hasSession = Boolean(session)
+    const restaurantId = authData?.restaurant_id || null
 
     useEffect(() => {
-        if (!hasSession) return
+        if (!restaurantId) return
 
         let active = true
 
         const loadRestaurant = async () => {
-            const { data } = await supabase
-                .from("restaurant_settings")
-                .select("id, restaurant_name, logo_url, is_open")
-                .limit(1)
-                .maybeSingle()
+            const [{ data: restRow }, { data: settingsRow }] = await Promise.all([
+                supabase
+                    .from("restaurants")
+                    .select("id, slug, name")
+                    .eq("id", restaurantId)
+                    .maybeSingle(),
+                supabase
+                    .from("restaurant_settings")
+                    .select("id, restaurant_name, logo_url, is_open")
+                    .eq("restaurant_id", restaurantId)
+                    .limit(1)
+                    .maybeSingle(),
+            ])
 
-            if (active && data) {
+            if (active) {
                 setRestaurant({
-                    id: data.id,
-                    name: data.restaurant_name || "",
-                    logo: data.logo_url || "",
-                    isOpen: data.is_open ?? true,
+                    id: restaurantId,
+                    slug: restRow?.slug || "",
+                    settingsId: settingsRow?.id || null,
+                    name: settingsRow?.restaurant_name || restRow?.name || "",
+                    logo: settingsRow?.logo_url || "",
+                    isOpen: settingsRow?.is_open ?? true,
                 })
             }
         }
@@ -159,10 +186,10 @@ function AdminLayout() {
                 loadRestaurant
             )
         }
-    }, [hasSession])
+    }, [restaurantId])
 
     const toggleOpen = async () => {
-        if (!restaurant.id || togglingOpen) return
+        if (!restaurant.settingsId || togglingOpen) return
 
         const next = !restaurant.isOpen
 
@@ -183,7 +210,7 @@ function AdminLayout() {
                 is_open: next,
                 updated_at: new Date().toISOString(),
             })
-            .eq("id", restaurant.id)
+            .eq("id", restaurant.settingsId)
             .select("id")
 
         if (error || !data || data.length === 0) {
@@ -207,6 +234,29 @@ function AdminLayout() {
 
     /* ---------- تنبيهات الطلبات الجديدة ---------- */
     const [soundEnabled, setSoundEnabled] = useState(readSoundPreference)
+    const [isDarkMode, setIsDarkMode] = useState(readThemePreference)
+
+    useEffect(() => {
+        document.documentElement.classList.toggle("dark", isDarkMode)
+        try {
+            localStorage.setItem(THEME_KEY, isDarkMode ? "dark" : "light")
+        } catch {
+            // ignore
+        }
+    }, [isDarkMode])
+
+    // لو المستخدم خرج من لوحة الأدمن (مثلاً لصفحة تسجيل الدخول أو منيو
+    // مطعم في نفس التبويب)، نشيل كلاس الوضع الليلي عشان ما يأثرش
+    // على صفحات تانية مالهاش علاقة بالوضع الليلي
+    useEffect(() => {
+        return () => {
+            document.documentElement.classList.remove("dark")
+        }
+    }, [])
+
+    const toggleTheme = () => {
+        setIsDarkMode((current) => !current)
+    }
     const [audioReady, setAudioReady] = useState(false)
     const [toasts, setToasts] = useState([])
 
@@ -277,7 +327,8 @@ function AdminLayout() {
     }
 
     const { pendingCount, realtimeStatus } = useNewOrderAlerts({
-        enabled: Boolean(session),
+        restaurantId,
+        enabled: Boolean(session) && Boolean(restaurantId),
         onNewOrder: handleNewOrder,
         onCustomerCancel: handleCustomerCancel,
     })
@@ -394,6 +445,11 @@ function AdminLayout() {
         return <Navigate to="/admin/login" replace />
     }
 
+    // لوحة تحكم المطاعم دي لأصحاب المطاعم بس؛ صاحب المنصة له لوحته الخاصة
+    if (authData?.role === "super_admin") {
+        return <Navigate to="/super-admin" replace />
+    }
+
     const ordersBadge = pendingCount > 0 && (
         <span className="absolute -top-1.5 -right-2 min-w-5 h-5 px-1 rounded-full bg-red-600 text-white text-[11px] font-bold flex items-center justify-center">
             {pendingCount > 99 ? "99+" : pendingCount}
@@ -494,7 +550,7 @@ function AdminLayout() {
                         <button
                             type="button"
                             onClick={toggleOpen}
-                            disabled={togglingOpen || !restaurant.id}
+                            disabled={togglingOpen || !restaurant.settingsId}
                             title={
                                 restaurant.isOpen
                                     ? "المطعم مفتوح — اضغط للإغلاق"
@@ -547,6 +603,32 @@ function AdminLayout() {
                                 </span>
                                 <span className="block text-xs opacity-60">
                                     {realtimeLabel}
+                                </span>
+                            </span>
+                        </button>
+
+                    </div>
+
+                    {/* Dark mode toggle */}
+                    <div className="px-3 pb-2">
+
+                        <button
+                            type="button"
+                            onClick={toggleTheme}
+                            title={
+                                isDarkMode
+                                    ? "الوضع الفاتح"
+                                    : "الوضع الليلي"
+                            }
+                            className="w-full flex items-center gap-3 h-12 px-3 rounded-xl font-medium hover:bg-(--color-background) transition-colors duration-200 whitespace-nowrap"
+                        >
+                            <span className="w-6 shrink-0 text-lg text-center">
+                                {isDarkMode ? "☀️" : "🌙"}
+                            </span>
+
+                            <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-right">
+                                <span className="block text-sm">
+                                    {isDarkMode ? "الوضع الفاتح" : "الوضع الليلي"}
                                 </span>
                             </span>
                         </button>
@@ -687,7 +769,7 @@ function AdminLayout() {
                         <button
                             type="button"
                             onClick={toggleOpen}
-                            disabled={togglingOpen || !restaurant.id}
+                            disabled={togglingOpen || !restaurant.settingsId}
                             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium hover:bg-(--color-background) transition text-right disabled:opacity-50"
                         >
                             <span className="text-lg">
@@ -731,6 +813,25 @@ function AdminLayout() {
                                 <span className="block text-xs opacity-60">
                                     {realtimeLabel}
                                 </span>
+                            </span>
+                        </button>
+
+                    </div>
+
+                    {/* Mobile dark mode toggle */}
+                    <div className="px-4 pb-2">
+
+                        <button
+                            type="button"
+                            onClick={toggleTheme}
+                            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium hover:bg-(--color-background) transition text-right"
+                        >
+                            <span className="text-lg">
+                                {isDarkMode ? "☀️" : "🌙"}
+                            </span>
+
+                            <span className="block">
+                                {isDarkMode ? "الوضع الفاتح" : "الوضع الليلي"}
                             </span>
                         </button>
 
@@ -781,7 +882,7 @@ function AdminLayout() {
                             <button
                                 type="button"
                                 onClick={toggleOpen}
-                                disabled={togglingOpen || !restaurant.id}
+                                disabled={togglingOpen || !restaurant.settingsId}
                                 aria-label="فتح أو إغلاق المطعم"
                                 className={`h-8 px-2.5 rounded-full text-xs font-bold text-white flex items-center gap-1 disabled:opacity-50 ${restaurant.isOpen
                                     ? "bg-green-600"
@@ -804,6 +905,15 @@ function AdminLayout() {
                                         {pendingCount > 99 ? "99+" : pendingCount}
                                     </span>
                                 )}
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={toggleTheme}
+                                aria-label="الوضع الليلي"
+                                className="w-10 h-10 rounded-xl hover:bg-(--color-background) transition flex items-center justify-center text-xl"
+                            >
+                                {isDarkMode ? "☀️" : "🌙"}
                             </button>
 
                             <BrandMark

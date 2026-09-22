@@ -1,8 +1,12 @@
 
 import { useEffect, useMemo, useState } from "react"
+import { useOutletContext } from "react-router-dom"
 import { supabase } from "../../lib/supabase"
 
 function AdminCategories() {
+    const { authData } = useOutletContext() || {}
+    const restaurantId = authData?.restaurant_id || null
+
     const [categories, setCategories] = useState([])
     const [products, setProducts] = useState([])
 
@@ -17,17 +21,21 @@ function AdminCategories() {
     const [name, setName] = useState("")
 
     const fetchData = async () => {
+        if (!restaurantId) return
+
         setLoading(true)
 
         const [categoriesResult, productsResult] = await Promise.all([
             supabase
                 .from("categories")
                 .select("*")
+                .eq("restaurant_id", restaurantId)
                 .order("created_at", { ascending: false }),
 
             supabase
                 .from("products")
-                .select("id, category"),
+                .select("id, category")
+                .eq("restaurant_id", restaurantId),
         ])
 
         if (categoriesResult.error) {
@@ -47,7 +55,7 @@ function AdminCategories() {
 
     useEffect(() => {
         fetchData()
-    }, [])
+    }, [restaurantId])
 
     const productCountByCategory = useMemo(() => {
         const counts = {}
@@ -137,10 +145,17 @@ function AdminCategories() {
                 )
             )
         } else {
+            if (!restaurantId) {
+                alert("تعذر تحديد المطعم.")
+                setSaving(false)
+                return
+            }
+
             const { data, error } = await supabase
                 .from("categories")
                 .insert({
                     name: trimmedName,
+                    restaurant_id: restaurantId,
                 })
                 .select()
                 .single()

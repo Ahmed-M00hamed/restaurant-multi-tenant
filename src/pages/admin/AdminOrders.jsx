@@ -1,10 +1,14 @@
 
 import { useEffect, useState } from "react"
+import { useOutletContext } from "react-router-dom"
 import { supabase } from "../../lib/supabase"
 import { buildWhatsAppLink } from "../../lib/whatsapp"
 import { ORDERS_CHANGED_EVENT } from "./useNewOrderAlerts"
 
 function AdminOrders() {
+    const { authData } = useOutletContext() || {}
+    const restaurantId = authData?.restaurant_id || null
+
     const [orders, setOrders] = useState([])
     const [orderItems, setOrderItems] = useState({})
     const [loading, setLoading] = useState(true)
@@ -20,6 +24,8 @@ function AdminOrders() {
 
     // silent = تحديث في الخلفية من غير شاشة "جاري التحميل"
     const loadOrders = async (silent = false) => {
+        if (!restaurantId) return
+
         if (!silent) {
             setLoading(true)
         }
@@ -27,6 +33,7 @@ function AdminOrders() {
         const { data: ordersData, error: ordersError } = await supabase
             .from("orders")
             .select("*")
+            .eq("restaurant_id", restaurantId)
             .order("created_at", { ascending: false })
 
         if (ordersError) {
@@ -72,7 +79,7 @@ function AdminOrders() {
 
     useEffect(() => {
         loadOrders()
-    }, [])
+    }, [restaurantId])
 
     // تحديث الطلبات تلقائيًا لما يوصل طلب جديد أو حالة طلب تتغير
     useEffect(() => {
@@ -87,11 +94,14 @@ function AdminOrders() {
 
     // اسم المطعم لرسالة واتساب
     useEffect(() => {
+        if (!restaurantId) return
+
         let active = true
 
         supabase
             .from("restaurant_settings")
             .select("restaurant_name")
+            .eq("restaurant_id", restaurantId)
             .limit(1)
             .maybeSingle()
             .then(({ data }) => {
@@ -103,7 +113,7 @@ function AdminOrders() {
         return () => {
             active = false
         }
-    }, [])
+    }, [restaurantId])
 
     /*
     |--------------------------------------------------------------------------
@@ -173,6 +183,7 @@ function AdminOrders() {
                 status: newStatus,
             })
             .eq("id", orderId)
+            .eq("restaurant_id", restaurantId)
 
         if (error) {
             console.error("Update order status error:", error)

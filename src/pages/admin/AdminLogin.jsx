@@ -34,10 +34,28 @@ function AdminLogin() {
             return
         }
 
-        console.log("Admin login successful")
+        // نوجّه حسب الدور: صاحب المنصة (super_admin) يروح للوحته الخاصة،
+        // وصاحب المطعم (admin) يروح للوحة مطعمه
+        const { data: authUser } = await supabase.auth.getUser()
+
+        let role = "admin"
+        if (authUser?.user) {
+            const { data: roleData } = await supabase
+                .from("user_roles")
+                .select("role")
+                .eq("user_id", authUser.user.id)
+                .maybeSingle()
+
+            role = roleData?.role || "admin"
+        }
 
         setLoading(false)
-        navigate("/admin/orders")
+
+        if (role === "super_admin") {
+            navigate("/super-admin")
+        } else {
+            navigate("/admin/orders")
+        }
     }
 
     return (
