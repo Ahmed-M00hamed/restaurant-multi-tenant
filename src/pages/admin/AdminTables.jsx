@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react"
 import { useOutletContext } from "react-router-dom"
 import QRCode from "react-qr-code"
@@ -6,6 +5,7 @@ import { supabase } from "../../lib/supabase"
 
 function AdminTables() {
     const { authData, restaurant } = useOutletContext() || {}
+
     const restaurantId = authData?.restaurant_id || null
     const restaurantSlug = restaurant?.slug || ""
 
@@ -32,7 +32,11 @@ function AdminTables() {
     // =========================
 
     const fetchTables = async () => {
-        if (!restaurantId) return
+        if (!restaurantId) {
+            setTables([])
+            setLoading(false)
+            return
+        }
 
         setLoading(true)
 
@@ -43,7 +47,7 @@ function AdminTables() {
             .order("table_number", { ascending: true })
 
         if (error) {
-            console.error(error)
+            console.error("Fetch tables error:", error)
             alert("حدث خطأ أثناء تحميل الطاولات")
             setTables([])
         } else {
@@ -62,7 +66,14 @@ function AdminTables() {
     // =========================
 
     const getTableUrl = (tableNumber) => {
-        const url = new URL(`/${restaurantSlug}`, window.location.origin)
+        if (!restaurantSlug) {
+            return ""
+        }
+
+        const url = new URL(
+            `/${encodeURIComponent(restaurantSlug)}`,
+            window.location.origin
+        )
 
         url.searchParams.set("table", tableNumber)
 
@@ -134,6 +145,16 @@ function AdminTables() {
             return
         }
 
+        if (!restaurantId) {
+            alert("تعذر تحديد المطعم.")
+            return
+        }
+
+        if (!restaurantSlug) {
+            alert("تعذر إنشاء QR لأن رابط المطعم غير متاح.")
+            return
+        }
+
         setSaving(true)
 
         const payload = {
@@ -154,21 +175,18 @@ function AdminTables() {
 
             error = result.error
         } else {
-            if (!restaurantId) {
-                alert("تعذر تحديد المطعم.")
-                setSaving(false)
-                return
-            }
-
             const result = await supabase
                 .from("tables")
-                .insert({ ...payload, restaurant_id: restaurantId })
+                .insert({
+                    ...payload,
+                    restaurant_id: restaurantId,
+                })
 
             error = result.error
         }
 
         if (error) {
-            console.error(error)
+            console.error("Save table error:", error)
 
             if (error.code === "23505") {
                 alert("رقم الترابيزة موجود بالفعل")
@@ -207,7 +225,7 @@ function AdminTables() {
             .eq("restaurant_id", restaurantId)
 
         if (error) {
-            console.error(error)
+            console.error("Delete table error:", error)
             alert("حدث خطأ أثناء حذف الترابيزة")
         } else {
             await fetchTables()
@@ -230,7 +248,7 @@ function AdminTables() {
             .eq("restaurant_id", restaurantId)
 
         if (error) {
-            console.error(error)
+            console.error("Toggle table error:", error)
             alert("حدث خطأ أثناء تغيير حالة الترابيزة")
             return
         }
@@ -245,11 +263,16 @@ function AdminTables() {
     const copyTableUrl = async (tableNumber) => {
         const url = getTableUrl(tableNumber)
 
+        if (!url) {
+            alert("تعذر إنشاء رابط الترابيزة لأن رابط المطعم غير متاح.")
+            return
+        }
+
         try {
             await navigator.clipboard.writeText(url)
             alert("تم نسخ رابط الترابيزة")
         } catch (error) {
-            console.error(error)
+            console.error("Copy URL error:", error)
             alert("لم نتمكن من نسخ الرابط")
         }
     }
@@ -265,6 +288,13 @@ function AdminTables() {
 
         if (!qrSvg) {
             alert("لم يتم العثور على QR")
+            return
+        }
+
+        const tableUrl = getTableUrl(table.table_number)
+
+        if (!tableUrl) {
+            alert("تعذر إنشاء رابط الترابيزة لأن رابط المطعم غير متاح.")
             return
         }
 
@@ -369,7 +399,7 @@ function AdminTables() {
                     </div>
 
                     <div class="url">
-                        ${getTableUrl(table.table_number)}
+                        ${tableUrl}
                     </div>
 
                 </div>
@@ -465,9 +495,7 @@ function AdminTables() {
             className="p-4 md:p-6 lg:p-8"
         >
 
-            {/* =========================
-                Header
-            ========================= */}
+            {/* Header */}
 
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
 
@@ -493,9 +521,22 @@ function AdminTables() {
 
             </div>
 
-            {/* =========================
-                Stats
-            ========================= */}
+            {/* Restaurant Slug Warning */}
+
+            {!restaurantSlug && (
+                <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 text-red-700 p-4">
+                    <p className="font-bold">
+                        تنبيه
+                    </p>
+
+                    <p className="text-sm mt-1">
+                        لم يتم العثور على رابط المطعم (Slug)،
+                        لذلك لن يمكن إنشاء روابط QR للطاولات.
+                    </p>
+                </div>
+            )}
+
+            {/* Stats */}
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
 
@@ -567,9 +608,7 @@ function AdminTables() {
 
             </div>
 
-            {/* =========================
-                Search
-            ========================= */}
+            {/* Search */}
 
             <div className="bg-(--color-card) border rounded-2xl p-4 mb-6">
 
@@ -583,9 +622,7 @@ function AdminTables() {
 
             </div>
 
-            {/* =========================
-                Empty
-            ========================= */}
+            {/* Empty */}
 
             {filteredTables.length === 0 ? (
                 <div className="bg-(--color-card) border rounded-2xl p-10 text-center">
@@ -614,163 +651,172 @@ function AdminTables() {
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-5">
 
-                    {filteredTables.map((table) => (
+                    {filteredTables.map((table) => {
 
-                        <div
-                            key={table.id}
-                            className="bg-(--color-card) border rounded-2xl overflow-hidden"
-                        >
+                        const tableUrl = getTableUrl(
+                            table.table_number
+                        )
 
-                            {/* Card Header */}
+                        return (
+                            <div
+                                key={table.id}
+                                className="bg-(--color-card) border rounded-2xl overflow-hidden"
+                            >
 
-                            <div className="p-5 border-b">
+                                {/* Card Header */}
 
-                                <div className="flex items-start justify-between gap-3">
+                                <div className="p-5 border-b">
 
-                                    <div>
+                                    <div className="flex items-start justify-between gap-3">
 
-                                        <div className="flex items-center gap-2">
+                                        <div>
 
-                                            <h2 className="text-xl font-bold">
-                                                ترابيزة {table.table_number}
-                                            </h2>
+                                            <div className="flex items-center gap-2">
 
-                                            <span
-                                                className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                                                    table.is_active
-                                                        ? "bg-green-100 text-green-700"
-                                                        : "bg-red-100 text-red-700"
-                                                }`}
-                                            >
-                                                {table.is_active
-                                                    ? "نشطة"
-                                                    : "متوقفة"}
-                                            </span>
+                                                <h2 className="text-xl font-bold">
+                                                    ترابيزة {table.table_number}
+                                                </h2>
+
+                                                <span
+                                                    className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                                                        table.is_active
+                                                            ? "bg-green-100 text-green-700"
+                                                            : "bg-red-100 text-red-700"
+                                                    }`}
+                                                >
+                                                    {table.is_active
+                                                        ? "نشطة"
+                                                        : "متوقفة"}
+                                                </span>
+
+                                            </div>
+
+                                            {table.name && (
+                                                <p className="text-sm opacity-60 mt-1">
+                                                    {table.name}
+                                                </p>
+                                            )}
 
                                         </div>
 
-                                        {table.name && (
-                                            <p className="text-sm opacity-60 mt-1">
-                                                {table.name}
-                                            </p>
+                                        <div className="text-3xl">
+                                            🪑
+                                        </div>
+
+                                    </div>
+
+                                    <p className="text-sm opacity-60 mt-3">
+                                        السعة: {table.capacity} أفراد
+                                    </p>
+
+                                </div>
+
+                                {/* QR */}
+
+                                <div className="p-5 flex flex-col items-center">
+
+                                    <div className="bg-white p-4 rounded-2xl border">
+
+                                        {tableUrl ? (
+                                            <QRCode
+                                                data-table-qr={table.id}
+                                                value={tableUrl}
+                                                size={170}
+                                                level="H"
+                                            />
+                                        ) : (
+                                            <div className="w-[170px] h-[170px] flex items-center justify-center text-center text-sm text-red-500">
+                                                تعذر إنشاء رابط QR
+                                            </div>
                                         )}
 
                                     </div>
 
-                                    <div className="text-3xl">
-                                        🪑
-                                    </div>
+                                    <p className="text-xs opacity-50 mt-3 text-center break-all">
+                                        {tableUrl || "رابط المطعم غير متاح"}
+                                    </p>
 
                                 </div>
 
-                                <p className="text-sm opacity-60 mt-3">
-                                    السعة: {table.capacity} أفراد
-                                </p>
+                                {/* Actions */}
 
-                            </div>
+                                <div className="p-4 border-t grid grid-cols-2 gap-2">
 
-                            {/* QR */}
+                                    <button
+                                        type="button"
+                                        onClick={() => setSelectedTable(table)}
+                                        className="px-3 py-2.5 rounded-xl border font-medium hover:bg-(--color-background) transition"
+                                    >
+                                        👁️ عرض
+                                    </button>
 
-                            <div className="p-5 flex flex-col items-center">
+                                    <button
+                                        type="button"
+                                        onClick={() => printQRCode(table)}
+                                        className="px-3 py-2.5 rounded-xl border font-medium hover:bg-(--color-background) transition"
+                                    >
+                                        🖨️ طباعة
+                                    </button>
 
-                                <div className="bg-white p-4 rounded-2xl border">
+                                    <button
+                                        type="button"
+                                        onClick={() => openEditForm(table)}
+                                        className="px-3 py-2.5 rounded-xl border font-medium hover:bg-(--color-background) transition"
+                                    >
+                                        ✏️ تعديل
+                                    </button>
 
-                                    <QRCode
-                                        data-table-qr={table.id}
-                                        value={getTableUrl(table.table_number)}
-                                        size={170}
-                                        level="H"
-                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => toggleActive(table)}
+                                        className={`px-3 py-2.5 rounded-xl border font-medium transition ${
+                                            table.is_active
+                                                ? "text-orange-600 hover:bg-orange-50"
+                                                : "text-green-600 hover:bg-green-50"
+                                        }`}
+                                    >
+                                        {table.is_active
+                                            ? "⏸️ إيقاف"
+                                            : "▶️ تفعيل"}
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            copyTableUrl(
+                                                table.table_number
+                                            )
+                                        }
+                                        className="px-3 py-2.5 rounded-xl border font-medium hover:bg-(--color-background) transition"
+                                    >
+                                        🔗 نسخ الرابط
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        disabled={
+                                            deletingId === table.id
+                                        }
+                                        onClick={() =>
+                                            handleDelete(table)
+                                        }
+                                        className="px-3 py-2.5 rounded-xl border border-red-200 text-red-600 font-medium hover:bg-red-50 transition disabled:opacity-50"
+                                    >
+                                        {deletingId === table.id
+                                            ? "جاري الحذف..."
+                                            : "🗑️ حذف"}
+                                    </button>
 
                                 </div>
 
-                                <p className="text-xs opacity-50 mt-3 text-center">
-                                    امسح الكود لفتح المنيو
-                                </p>
-
                             </div>
-
-                            {/* Actions */}
-
-                            <div className="p-4 border-t grid grid-cols-2 gap-2">
-
-                                <button
-                                    type="button"
-                                    onClick={() => setSelectedTable(table)}
-                                    className="px-3 py-2.5 rounded-xl border font-medium hover:bg-(--color-background) transition"
-                                >
-                                    👁️ عرض
-                                </button>
-
-                                <button
-                                    type="button"
-                                    onClick={() => printQRCode(table)}
-                                    className="px-3 py-2.5 rounded-xl border font-medium hover:bg-(--color-background) transition"
-                                >
-                                    🖨️ طباعة
-                                </button>
-
-                                <button
-                                    type="button"
-                                    onClick={() => openEditForm(table)}
-                                    className="px-3 py-2.5 rounded-xl border font-medium hover:bg-(--color-background) transition"
-                                >
-                                    ✏️ تعديل
-                                </button>
-
-                                <button
-                                    type="button"
-                                    onClick={() => toggleActive(table)}
-                                    className={`px-3 py-2.5 rounded-xl border font-medium transition ${
-                                        table.is_active
-                                            ? "text-orange-600 hover:bg-orange-50"
-                                            : "text-green-600 hover:bg-green-50"
-                                    }`}
-                                >
-                                    {table.is_active
-                                        ? "⏸️ إيقاف"
-                                        : "▶️ تفعيل"}
-                                </button>
-
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        copyTableUrl(
-                                            table.table_number
-                                        )
-                                    }
-                                    className="px-3 py-2.5 rounded-xl border font-medium hover:bg-(--color-background) transition"
-                                >
-                                    🔗 نسخ الرابط
-                                </button>
-
-                                <button
-                                    type="button"
-                                    disabled={
-                                        deletingId === table.id
-                                    }
-                                    onClick={() =>
-                                        handleDelete(table)
-                                    }
-                                    className="px-3 py-2.5 rounded-xl border border-red-200 text-red-600 font-medium hover:bg-red-50 transition disabled:opacity-50"
-                                >
-                                    {deletingId === table.id
-                                        ? "جاري الحذف..."
-                                        : "🗑️ حذف"}
-                                </button>
-
-                            </div>
-
-                        </div>
-
-                    ))}
+                        )
+                    })}
 
                 </div>
             )}
 
-            {/* =========================
-                Add / Edit Modal
-            ========================= */}
+            {/* Add / Edit Modal */}
 
             {showForm && (
                 <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
@@ -941,9 +987,7 @@ function AdminTables() {
                 </div>
             )}
 
-            {/* =========================
-                QR Preview Modal
-            ========================= */}
+            {/* QR Preview Modal */}
 
             {selectedTable && (
                 <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
@@ -981,13 +1025,21 @@ function AdminTables() {
 
                             <div className="bg-white p-5 rounded-2xl border">
 
-                                <QRCode
-                                    value={getTableUrl(
-                                        selectedTable.table_number
-                                    )}
-                                    size={260}
-                                    level="H"
-                                />
+                                {getTableUrl(
+                                    selectedTable.table_number
+                                ) ? (
+                                    <QRCode
+                                        value={getTableUrl(
+                                            selectedTable.table_number
+                                        )}
+                                        size={260}
+                                        level="H"
+                                    />
+                                ) : (
+                                    <div className="w-[260px] h-[260px] flex items-center justify-center text-center text-red-500">
+                                        رابط المطعم غير متاح
+                                    </div>
+                                )}
 
                             </div>
 
@@ -1022,7 +1074,7 @@ function AdminTables() {
                                     <p className="text-sm break-all">
                                         {getTableUrl(
                                             selectedTable.table_number
-                                        )}
+                                        ) || "رابط غير متاح"}
                                     </p>
 
                                 </div>
