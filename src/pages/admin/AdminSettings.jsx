@@ -19,6 +19,7 @@ const OVERLAY_PRESETS = [
     { name: "ذهبي", color: "#b45309" },
     { name: "أبيض", color: "#ffffff" },
 ]
+
 import AdminDeliveryAreas from "./AdminDeliveryAreas"
 
 function AdminSettings() {
@@ -123,7 +124,7 @@ function AdminSettings() {
                 header_color: settings.header_color || null,
                 header_opacity:
                     settings.header_opacity === "" ||
-                    settings.header_opacity === undefined
+                        settings.header_opacity === undefined
                         ? null
                         : settings.header_opacity,
 
@@ -175,6 +176,7 @@ function AdminSettings() {
             const url = await uploadBrandingImage(
                 file,
                 kind,
+                restaurantId,
                 kind === "logo"
                     ? { maxSize: 512 }
                     : { maxSize: 1600 }
@@ -200,11 +202,11 @@ function AdminSettings() {
     const pickerColor = hexToRgb(settings?.header_color)
         ? settings.header_color.length === 4
             ? "#" +
-              settings.header_color
-                  .slice(1)
-                  .split("")
-                  .map((c) => c + c)
-                  .join("")
+            settings.header_color
+                .slice(1)
+                .split("")
+                .map((c) => c + c)
+                .join("")
             : settings.header_color
         : DEFAULT_OVERLAY_COLOR
 

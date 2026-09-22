@@ -1,7 +1,5 @@
 import { supabase } from "./supabase"
 
-const BUCKET = "product-images"
-
 // بيصغّر الصورة قبل الرفع عشان المنيو يفتح بسرعة على الموبايل
 export const resizeImage = async (
   file,
@@ -22,11 +20,19 @@ export const resizeImage = async (
     canvas.width = width
     canvas.height = height
 
-    canvas.getContext("2d").drawImage(bitmap, 0, 0, width, height)
+    canvas.getContext("2d").drawImage(
+      bitmap,
+      0,
+      0,
+      width,
+      height,
+    )
 
     // PNG بيفضل PNG عشان الشفافية (اللوجو)
     const type =
-      file.type === "image/png" ? "image/png" : "image/jpeg"
+      file.type === "image/png"
+        ? "image/png"
+        : "image/jpeg"
 
     const blob = await new Promise((resolve) =>
       canvas.toBlob(resolve, type, quality),
@@ -40,12 +46,18 @@ export const resizeImage = async (
   }
 }
 
-// بيرفع صورة (لوجو / غلاف) ويرجّع الرابط العام
+// بيرفع صورة Branding (لوجو / غلاف)
+// ويرجع الرابط العام
 export const uploadBrandingImage = async (
   file,
   kind,
+  restaurantId,
   options,
 ) => {
+  if (!restaurantId) {
+    throw new Error("لم يتم تحديد المطعم.")
+  }
+
   if (!file.type.startsWith("image/")) {
     throw new Error("من فضلك اختر ملف صورة فقط.")
   }
@@ -56,12 +68,18 @@ export const uploadBrandingImage = async (
 
   const body = await resizeImage(file, options)
 
-  const extension = body.type === "image/png" ? "png" : "jpg"
+  const extension =
+    body.type === "image/png"
+      ? "png"
+      : "jpg"
 
-  const path = `branding/${kind}-${Date.now()}.${extension}`
+  const fileName = `${kind}-${crypto.randomUUID()}.${extension}`
+
+  // كل مطعم له folder خاص به
+  const path = `${restaurantId}/${fileName}`
 
   const { error } = await supabase.storage
-    .from(BUCKET)
+    .from("restaurant-images")
     .upload(path, body, {
       cacheControl: "31536000",
       contentType: body.type || file.type,
@@ -71,7 +89,7 @@ export const uploadBrandingImage = async (
   if (error) throw error
 
   const { data } = supabase.storage
-    .from(BUCKET)
+    .from("restaurant-images")
     .getPublicUrl(path)
 
   return data.publicUrl
