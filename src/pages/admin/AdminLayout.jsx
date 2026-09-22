@@ -475,7 +475,7 @@ function AdminLayout() {
                         fixed top-0 right-0
                         z-50
                         h-screen
-                        w-[72px]
+                        w-18
                         hover:w-72
                         shrink-0
                         bg-(--color-card)
@@ -490,7 +490,7 @@ function AdminLayout() {
                 >
 
                     {/* Logo */}
-                    <div className="h-[88px] px-3 border-b flex items-center">
+                    <div className="h-22 px-3 border-b flex items-center">
 
                         <div className="flex items-center gap-3 min-w-max">
 
@@ -863,7 +863,7 @@ function AdminLayout() {
                     Desktop:
                     72px مساحة للـSidebar
                 ===================================================== */}
-                <main className="md:mr-[72px] min-w-0">
+                <main className="md:mr-18 min-w-0">
 
                     {/* Mobile Header */}
                     <div className="md:hidden sticky top-0 z-30 h-16 bg-(--color-card) border-b flex items-center justify-between px-4">
@@ -941,7 +941,7 @@ function AdminLayout() {
                 إشعارات الطلبات الجديدة
             ===================================================== */}
             {toasts.length > 0 && (
-                <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[80] w-[calc(100%-2rem)] max-w-sm space-y-3">
+                <div className="fixed top-4 left-1/2 -translate-x-1/2 z-80 w-[calc(100%-2rem)] max-w-sm space-y-3">
 
                     {toasts.map((toast) => (
                         <div

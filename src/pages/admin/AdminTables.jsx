@@ -264,7 +264,9 @@ function AdminTables() {
         const url = getTableUrl(tableNumber)
 
         if (!url) {
-            alert("تعذر إنشاء رابط الترابيزة لأن رابط المطعم غير متاح.")
+            alert(
+                "تعذر إنشاء رابط الترابيزة لأن رابط المطعم غير متاح."
+            )
             return
         }
 
@@ -294,7 +296,9 @@ function AdminTables() {
         const tableUrl = getTableUrl(table.table_number)
 
         if (!tableUrl) {
-            alert("تعذر إنشاء رابط الترابيزة لأن رابط المطعم غير متاح.")
+            alert(
+                "تعذر إنشاء رابط الترابيزة لأن رابط المطعم غير متاح."
+            )
             return
         }
 
@@ -352,6 +356,13 @@ function AdminTables() {
                         display: flex;
                         justify-content: center;
                         margin: 20px 0 30px;
+                        background: white;
+                        padding: 20px;
+                    }
+
+                    .qr svg {
+                        width: 280px !important;
+                        height: 280px !important;
                     }
 
                     .text {
@@ -525,6 +536,7 @@ function AdminTables() {
 
             {!restaurantSlug && (
                 <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 text-red-700 p-4">
+
                     <p className="font-bold">
                         تنبيه
                     </p>
@@ -533,6 +545,7 @@ function AdminTables() {
                         لم يتم العثور على رابط المطعم (Slug)،
                         لذلك لن يمكن إنشاء روابط QR للطاولات.
                     </p>
+
                 </div>
             )}
 
@@ -545,6 +558,7 @@ function AdminTables() {
                     <div className="flex items-center justify-between">
 
                         <div>
+
                             <p className="text-sm opacity-60">
                                 إجمالي الطاولات
                             </p>
@@ -552,6 +566,7 @@ function AdminTables() {
                             <p className="text-3xl font-bold mt-2">
                                 {totalTables}
                             </p>
+
                         </div>
 
                         <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-2xl">
@@ -567,6 +582,7 @@ function AdminTables() {
                     <div className="flex items-center justify-between">
 
                         <div>
+
                             <p className="text-sm opacity-60">
                                 الطاولات النشطة
                             </p>
@@ -574,6 +590,7 @@ function AdminTables() {
                             <p className="text-3xl font-bold mt-2 text-green-600">
                                 {activeTables}
                             </p>
+
                         </div>
 
                         <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center text-2xl">
@@ -589,6 +606,7 @@ function AdminTables() {
                     <div className="flex items-center justify-between">
 
                         <div>
+
                             <p className="text-sm opacity-60">
                                 الطاولات المتوقفة
                             </p>
@@ -596,6 +614,7 @@ function AdminTables() {
                             <p className="text-3xl font-bold mt-2 text-red-600">
                                 {inactiveTables}
                             </p>
+
                         </div>
 
                         <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center text-2xl">
@@ -615,7 +634,9 @@ function AdminTables() {
                 <input
                     type="text"
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e) =>
+                        setSearchTerm(e.target.value)
+                    }
                     placeholder="ابحث برقم الترابيزة أو اسمها..."
                     className="w-full px-4 py-3 rounded-xl border bg-transparent outline-none focus:ring-2 focus:ring-(--color-primary)"
                 />
@@ -625,6 +646,7 @@ function AdminTables() {
             {/* Empty */}
 
             {filteredTables.length === 0 ? (
+
                 <div className="bg-(--color-card) border rounded-2xl p-10 text-center">
 
                     <div className="text-5xl mb-4">
@@ -648,7 +670,9 @@ function AdminTables() {
                     </button>
 
                 </div>
+
             ) : (
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-5">
 
                     {filteredTables.map((table) => {
@@ -718,22 +742,35 @@ function AdminTables() {
                                     <div className="bg-white p-4 rounded-2xl border">
 
                                         {tableUrl ? (
+
                                             <QRCode
                                                 data-table-qr={table.id}
                                                 value={tableUrl}
                                                 size={170}
-                                                level="H"
+                                                level="M"
+                                                bgColor="#FFFFFF"
+                                                fgColor="#000000"
+                                                title={`QR ترابيزة ${table.table_number}`}
+                                                style={{
+                                                    width: "170px",
+                                                    height: "170px",
+                                                    display: "block",
+                                                }}
                                             />
+
                                         ) : (
-                                            <div className="w-[170px] h-[170px] flex items-center justify-center text-center text-sm text-red-500">
+
+                                            <div className="w-42.5 h-42.5 flex items-center justify-center text-center text-sm text-red-500">
                                                 تعذر إنشاء رابط QR
                                             </div>
+
                                         )}
 
                                     </div>
 
                                     <p className="text-xs opacity-50 mt-3 text-center break-all">
-                                        {tableUrl || "رابط المطعم غير متاح"}
+                                        {tableUrl ||
+                                            "رابط المطعم غير متاح"}
                                     </p>
 
                                 </div>
@@ -744,7 +781,9 @@ function AdminTables() {
 
                                     <button
                                         type="button"
-                                        onClick={() => setSelectedTable(table)}
+                                        onClick={() =>
+                                            setSelectedTable(table)
+                                        }
                                         className="px-3 py-2.5 rounded-xl border font-medium hover:bg-(--color-background) transition"
                                     >
                                         👁️ عرض
@@ -752,7 +791,9 @@ function AdminTables() {
 
                                     <button
                                         type="button"
-                                        onClick={() => printQRCode(table)}
+                                        onClick={() =>
+                                            printQRCode(table)
+                                        }
                                         className="px-3 py-2.5 rounded-xl border font-medium hover:bg-(--color-background) transition"
                                     >
                                         🖨️ طباعة
@@ -760,7 +801,9 @@ function AdminTables() {
 
                                     <button
                                         type="button"
-                                        onClick={() => openEditForm(table)}
+                                        onClick={() =>
+                                            openEditForm(table)
+                                        }
                                         className="px-3 py-2.5 rounded-xl border font-medium hover:bg-(--color-background) transition"
                                     >
                                         ✏️ تعديل
@@ -768,7 +811,9 @@ function AdminTables() {
 
                                     <button
                                         type="button"
-                                        onClick={() => toggleActive(table)}
+                                        onClick={() =>
+                                            toggleActive(table)
+                                        }
                                         className={`px-3 py-2.5 rounded-xl border font-medium transition ${
                                             table.is_active
                                                 ? "text-orange-600 hover:bg-orange-50"
@@ -1023,22 +1068,34 @@ function AdminTables() {
 
                         <div className="p-6 flex flex-col items-center">
 
-                            <div className="bg-white p-5 rounded-2xl border">
+                            <div className="bg-white p-6 rounded-2xl border">
 
                                 {getTableUrl(
                                     selectedTable.table_number
                                 ) ? (
+
                                     <QRCode
                                         value={getTableUrl(
                                             selectedTable.table_number
                                         )}
-                                        size={260}
-                                        level="H"
+                                        size={280}
+                                        level="M"
+                                        bgColor="#FFFFFF"
+                                        fgColor="#000000"
+                                        title={`QR ترابيزة ${selectedTable.table_number}`}
+                                        style={{
+                                            width: "280px",
+                                            height: "280px",
+                                            display: "block",
+                                        }}
                                     />
+
                                 ) : (
-                                    <div className="w-[260px] h-[260px] flex items-center justify-center text-center text-red-500">
+
+                                    <div className="w-70 h-70 flex items-center justify-center text-center text-red-500">
                                         رابط المطعم غير متاح
                                     </div>
+
                                 )}
 
                             </div>
@@ -1074,7 +1131,8 @@ function AdminTables() {
                                     <p className="text-sm break-all">
                                         {getTableUrl(
                                             selectedTable.table_number
-                                        ) || "رابط غير متاح"}
+                                        ) ||
+                                            "رابط غير متاح"}
                                     </p>
 
                                 </div>

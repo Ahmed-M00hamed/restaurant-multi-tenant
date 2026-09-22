@@ -10,6 +10,7 @@ import { applyBranding, getHeaderOverlay } from "./lib/branding"
 
 const ACTIVE_ORDER_KEY = "menuflow_active_order"
 const FINAL_STATUSES = ["delivered", "cancelled"]
+const CANCELLABLE_STATUSES = ["pending", "processing"]
 const POLL_INTERVAL_MS = 4000
 
 const CANCEL_REASONS = [
@@ -897,6 +898,11 @@ function App() {
       orderStatus,
     )
 
+  const canCancelOrder =
+    CANCELLABLE_STATUSES.includes(
+      orderStatus,
+    )
+
   const trackedOrderId =
     trackedOrder?.id
 
@@ -943,6 +949,16 @@ function App() {
       }
 
       setOrderStatus(row.status)
+
+      // لو الطلب خرج من الحالات المسموح بإلغائها،
+      // اقفل نافذة الإلغاء لو كانت مفتوحة.
+      if (
+        !CANCELLABLE_STATUSES.includes(
+          row.status,
+        )
+      ) {
+        setShowCancel(false)
+      }
     }
 
     fetchStatus()
@@ -974,6 +990,16 @@ function App() {
       isCancelling
     )
       return
+
+    // منع الإلغاء بعد بدء التجهيز/خروج الطلب
+    if (
+      !CANCELLABLE_STATUSES.includes(
+        orderStatus,
+      )
+    ) {
+      setShowCancel(false)
+      return
+    }
 
     if (!cancelReason) {
       alert(
@@ -1216,7 +1242,7 @@ function App() {
           <div
             className={
               restaurantCover
-                ? "rounded-3xl p-4 md:p-6 backdrop-blur-md w-full md:w-fit md:min-w-[380px] md:max-w-xl border border-white/20 shadow-xl"
+                ? "rounded-3xl p-4 md:p-6 backdrop-blur-md w-full md:w-fit md:min-w-95 md:max-w-xl border border-white/20 shadow-xl"
                 : ""
             }
             style={
@@ -1231,7 +1257,6 @@ function App() {
             }
           >
             <div className="flex items-center gap-4">
-              {/* Logo */}
               <div
                 className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-(--color-primary) text-white flex items-center justify-center overflow-hidden shrink-0 shadow-lg ${
                   isColoredHeader
@@ -1259,7 +1284,6 @@ function App() {
                   {restaurantName}
                 </h1>
 
-                {/* حالة المطعم */}
                 <div className="mt-2 inline-flex items-center gap-2">
                   <span
                     className={`w-2.5 h-2.5 rounded-full shrink-0 ${
@@ -1293,7 +1317,6 @@ function App() {
         </div>
       </header>
 
-      {/* Closed Message */}
       {!isRestaurantOpen && (
         <div className="bg-red-50 text-red-700 border-b border-red-100 text-center py-3 px-4">
           <div className="flex items-center justify-center gap-2 text-sm font-bold">
@@ -1303,16 +1326,8 @@ function App() {
         </div>
       )}
 
-      {/* ========================================
-          MAIN
-      ======================================== */}
-
       <main className="max-w-md md:max-w-3xl lg:max-w-6xl mx-auto px-4 py-6 md:py-8">
-
-        {/* Search + Categories */}
         <div className="space-y-4">
-
-          {/* Search */}
           <div className="relative">
             <input
               type="text"
@@ -1329,7 +1344,6 @@ function App() {
             </span>
           </div>
 
-          {/* Categories */}
           <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
             {categories.map(
               (cat) => (
@@ -1353,10 +1367,6 @@ function App() {
             )}
           </div>
         </div>
-
-        {/* ========================================
-            Products
-        ======================================== */}
 
         {isLoadingMenu ? (
           <div className="text-center py-20 opacity-60">
@@ -1416,7 +1426,6 @@ function App() {
                         : ""
                     }`}
                   >
-                    {/* Product Image */}
                     {product.image_url ? (
                       <div className="relative w-full h-48 overflow-hidden bg-gray-100">
                         <img
@@ -1444,7 +1453,6 @@ function App() {
                       </div>
                     )}
 
-                    {/* Product Content */}
                     <div className="p-4">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0 flex-1">
@@ -1467,7 +1475,6 @@ function App() {
                         </span>
                       </div>
 
-                      {/* Add / Quantity */}
                       <div className="mt-4">
                         {isUnavailable ? (
                           <div className="w-full bg-red-50 text-red-500 rounded-xl py-2.5 text-center text-xs font-bold">
@@ -1528,7 +1535,6 @@ function App() {
       ======================================== */}
 
       <div className="fixed bottom-4 left-4 right-4 z-40 max-w-md md:max-w-xl mx-auto space-y-2">
-
         {trackedOrder &&
           !isTrackingOpen && (
             <button
@@ -1578,6 +1584,7 @@ function App() {
       </div>
 
       {/* WhatsApp */}
+
       {whatsappContactLink && (
         <a
           href={whatsappContactLink}
@@ -1736,11 +1743,9 @@ function App() {
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
-
               {orderType ===
                 "select" && (
                 <div className="space-y-3">
-
                   {deliveryEnabled && (
                     <button
                       onClick={() =>
@@ -1841,12 +1846,10 @@ function App() {
                 </div>
               )}
 
-              {/* بيانات الطلب */}
               {orderType !==
                 "select" &&
                 !showReview && (
                   <div className="space-y-4">
-
                     {orderType ===
                     "dine-in" ? (
                       <div className="bg-(--color-background) rounded-xl p-4 text-sm">
@@ -2042,12 +2045,10 @@ function App() {
                   </div>
                 )}
 
-              {/* مراجعة */}
               {orderType !==
                 "select" &&
                 showReview && (
                   <div className="space-y-4">
-
                     <div className="space-y-2">
                       {cart.map(
                         (item) => (
@@ -2232,7 +2233,6 @@ function App() {
             />
 
             <div className="relative bg-(--color-card) w-full md:max-w-md md:rounded-2xl rounded-t-3xl max-h-[90vh] flex flex-col overflow-y-auto shadow-2xl">
-
               <div className="flex items-center justify-between p-4 border-b">
                 <h2 className="font-black text-lg">
                   تتبع طلبك
@@ -2252,7 +2252,6 @@ function App() {
               </div>
 
               <div className="p-4 space-y-5">
-
                 <div className="text-center">
                   <p className="text-2xl font-black">
                     {getStatusHeadline(
@@ -2344,7 +2343,7 @@ function App() {
                   >
                     اطلب تاني
                   </button>
-                ) : (
+                ) : canCancelOrder ? (
                   <button
                     onClick={() =>
                       setShowCancel(
@@ -2355,7 +2354,7 @@ function App() {
                   >
                     إلغاء الطلب
                   </button>
-                )}
+                ) : null}
               </div>
             </div>
           </div>
@@ -2365,8 +2364,9 @@ function App() {
           Cancel
       ======================================== */}
 
-      {showCancel && (
-        <div className="fixed inset-0 z-[60] flex items-end md:items-center justify-center">
+      {showCancel &&
+        canCancelOrder && (
+        <div className="fixed inset-0 z-60 flex items-end md:items-center justify-center">
           <div
             className="absolute inset-0 bg-black/50"
             onClick={() =>
@@ -2376,7 +2376,6 @@ function App() {
           />
 
           <div className="relative bg-(--color-card) w-full md:max-w-md md:rounded-2xl rounded-t-3xl shadow-2xl">
-
             <div className="flex items-center justify-between p-4 border-b">
               <h2 className="font-black text-lg">
                 إلغاء الطلب
