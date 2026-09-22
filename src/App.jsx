@@ -552,9 +552,9 @@ function App() {
         return currentCart.map((item) =>
           item.id === product.id
             ? {
-                ...item,
-                quantity: item.quantity + 1,
-              }
+              ...item,
+              quantity: item.quantity + 1,
+            }
             : item,
         )
       }
@@ -574,9 +574,9 @@ function App() {
       currentCart.map((item) =>
         item.id === productId
           ? {
-              ...item,
-              quantity: item.quantity + 1,
-            }
+            ...item,
+            quantity: item.quantity + 1,
+          }
           : item,
       ),
     )
@@ -588,9 +588,9 @@ function App() {
         .map((item) =>
           item.id === productId
             ? {
-                ...item,
-                quantity: item.quantity - 1,
-              }
+              ...item,
+              quantity: item.quantity - 1,
+            }
             : item,
         )
         .filter((item) => item.quantity > 0),
@@ -776,21 +776,21 @@ function App() {
             orderType === "dine-in"
               ? null
               : customerInfo.name.trim() ||
-                null,
+              null,
           customer_phone:
             orderType === "dine-in"
               ? null
               : customerInfo.phone.trim() ||
-                null,
+              null,
           delivery_area:
             orderType === "delivery"
               ? customerInfo.deliveryArea ||
-                null
+              null
               : null,
           address:
             orderType === "delivery"
               ? customerInfo.address.trim() ||
-                null
+              null
               : null,
           notes:
             customerInfo.notes.trim() ||
@@ -1010,7 +1010,7 @@ function App() {
 
     if (
       cancelReason ===
-        OTHER_CANCEL_REASON &&
+      OTHER_CANCEL_REASON &&
       !cancelNote.trim()
     ) {
       alert(
@@ -1029,7 +1029,7 @@ function App() {
           cancelled_by: "customer",
           cancel_reason:
             cancelReason ===
-            OTHER_CANCEL_REASON
+              OTHER_CANCEL_REASON
               ? cancelNote.trim()
               : cancelReason,
           cancelled_at:
@@ -1085,9 +1085,9 @@ function App() {
   const whatsappContactLink =
     restaurantPhone
       ? buildWhatsAppLink(
-          restaurantPhone,
-          `مرحباً، عندي استفسار بخصوص ${restaurantName} 🙋`,
-        )
+        restaurantPhone,
+        `مرحباً، عندي استفسار بخصوص ${restaurantName} 🙋`,
+      )
       : ""
 
   // ========================================
@@ -1167,8 +1167,8 @@ function App() {
 
   const trackingSteps = trackedOrder
     ? getTrackingSteps(
-        trackedOrder.type,
-      )
+      trackedOrder.type,
+    )
     : []
 
   const currentStepIndex =
@@ -1206,11 +1206,11 @@ function App() {
         style={
           solidHeader
             ? {
-                backgroundColor:
-                  overlay.solidColor,
-                color:
-                  overlay.textColor,
-              }
+              backgroundColor:
+                overlay.solidColor,
+              color:
+                overlay.textColor,
+            }
             : undefined
         }
       >
@@ -1233,11 +1233,10 @@ function App() {
         )}
 
         <div
-          className={`relative max-w-md md:max-w-3xl lg:max-w-6xl mx-auto px-4 ${
-            restaurantCover
+          className={`relative max-w-md md:max-w-3xl lg:max-w-6xl mx-auto px-4 ${restaurantCover
               ? "pt-28 md:pt-44 lg:pt-56 pb-5"
               : "py-6 md:py-9"
-          }`}
+            }`}
         >
           <div
             className={
@@ -1248,21 +1247,20 @@ function App() {
             style={
               restaurantCover
                 ? {
-                    backgroundColor:
-                      overlay.backgroundColor,
-                    color:
-                      overlay.textColor,
-                  }
+                  backgroundColor:
+                    overlay.backgroundColor,
+                  color:
+                    overlay.textColor,
+                }
                 : undefined
             }
           >
             <div className="flex items-center gap-4">
               <div
-                className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-(--color-primary) text-white flex items-center justify-center overflow-hidden shrink-0 shadow-lg ${
-                  isColoredHeader
+                className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-(--color-primary) text-white flex items-center justify-center overflow-hidden shrink-0 shadow-lg ${isColoredHeader
                     ? "ring-2 ring-white/80"
                     : ""
-                }`}
+                  }`}
               >
                 {restaurantLogo ? (
                   <img
@@ -1286,19 +1284,17 @@ function App() {
 
                 <div className="mt-2 inline-flex items-center gap-2">
                   <span
-                    className={`w-2.5 h-2.5 rounded-full shrink-0 ${
-                      isRestaurantOpen
+                    className={`w-2.5 h-2.5 rounded-full shrink-0 ${isRestaurantOpen
                         ? "bg-green-500 shadow-[0_0_0_4px_rgba(34,197,94,0.15)]"
                         : "bg-red-500 shadow-[0_0_0_4px_rgba(239,68,68,0.15)]"
-                    }`}
+                      }`}
                   />
 
                   <span
-                    className={`text-sm font-bold ${
-                      isRestaurantOpen
+                    className={`text-sm font-bold ${isRestaurantOpen
                         ? "text-green-600"
                         : "text-red-600"
-                    }`}
+                      }`}
                   >
                     {isRestaurantOpen
                       ? "مفتوح الآن"
@@ -1354,12 +1350,11 @@ function App() {
                       cat.name,
                     )
                   }
-                  className={`px-5 py-2.5 rounded-full text-sm whitespace-nowrap transition-all font-bold shrink-0 ${
-                    selectedCategory ===
-                    cat.name
+                  className={`px-5 py-2.5 rounded-full text-sm whitespace-nowrap transition-all font-bold shrink-0 ${selectedCategory ===
+                      cat.name
                       ? "bg-(--color-primary) text-white shadow-md"
                       : "bg-(--color-card) border border-black/5 text-gray-600 hover:border-(--color-primary)/30"
-                  }`}
+                    }`}
                 >
                   {cat.name}
                 </button>
@@ -1420,11 +1415,10 @@ function App() {
                 return (
                   <div
                     key={product.id}
-                    className={`group bg-(--color-card) border border-black/5 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all ${
-                      isUnavailable
+                    className={`group bg-(--color-card) border border-black/5 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all ${isUnavailable
                         ? "opacity-60"
                         : ""
-                    }`}
+                      }`}
                   >
                     {product.image_url ? (
                       <div className="relative w-full h-48 overflow-hidden bg-gray-100">
@@ -1591,9 +1585,18 @@ function App() {
           target="_blank"
           rel="noreferrer"
           aria-label="تواصل عبر واتساب"
-          className="fixed bottom-24 left-4 z-40 w-12 h-12 rounded-full bg-green-500 text-white flex items-center justify-center shadow-lg text-2xl"
+          className="fixed bottom-24 left-4 z-40 w-12 h-12 rounded-full bg-green-500 text-white flex items-center justify-center shadow-lg"
         >
-          💬
+          <svg
+            viewBox="0 0 32 32"
+            className="w-7 h-7"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d="M19.11 17.02c-.27-.14-1.6-.79-1.85-.88-.25-.09-.43-.14-.61.14-.18.27-.7.88-.86 1.06-.16.18-.32.2-.59.07-.27-.14-1.13-.42-2.15-1.34-.79-.7-1.32-1.56-1.48-1.83-.16-.27-.02-.42.12-.56.12-.12.27-.32.41-.48.14-.16.18-.27.27-.45.09-.18.05-.34-.02-.48-.07-.14-.61-1.47-.84-2.01-.22-.53-.45-.46-.61-.47h-.52c-.18 0-.48.07-.73.34-.25.27-.95.93-.95 2.26s.98 2.62 1.11 2.8c.14.18 1.92 2.93 4.65 4.11.65.28 1.15.45 1.54.57.65.21 1.24.18 1.7.11.52-.08 1.6-.66 1.83-1.3.23-.64.23-1.19.16-1.3-.07-.11-.25-.18-.52-.32Z" />
+
+            <path d="M16.03 3.2c-7.05 0-12.78 5.73-12.78 12.78 0 2.25.59 4.36 1.62 6.19L3.14 28.8l6.79-1.78a12.75 12.75 0 0 0 6.1 1.55h.01c7.04 0 12.77-5.73 12.77-12.78S23.08 3.2 16.03 3.2Zm0 23.18h-.01a10.36 10.36 0 0 1-5.29-1.44l-.38-.23-4.03 1.06 1.08-3.93-.25-.4a10.37 10.37 0 1 1 8.88 4.94Z" />
+          </svg>
         </a>
       )}
 
@@ -1724,7 +1727,7 @@ function App() {
             <div className="flex items-center justify-between p-4 border-b">
               <h2 className="font-black text-lg">
                 {orderType ===
-                "select"
+                  "select"
                   ? "اختر نوع الطلب"
                   : showReview
                     ? "مراجعة الطلب"
@@ -1745,113 +1748,113 @@ function App() {
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {orderType ===
                 "select" && (
-                <div className="space-y-3">
-                  {deliveryEnabled && (
-                    <button
-                      onClick={() =>
-                        selectOrderType(
-                          "delivery",
-                        )
-                      }
-                      className="w-full flex items-center gap-3 p-4 rounded-2xl border hover:border-(--color-primary) transition text-right"
-                    >
-                      <span className="text-2xl">
-                        🛵
-                      </span>
-
-                      <span>
-                        <span className="block font-bold">
-                          توصيل للمنزل
-                        </span>
-
-                        <span className="block text-xs opacity-60">
-                          هنوصلّهولك
-                        </span>
-                      </span>
-                    </button>
-                  )}
-
-                  {pickupEnabled && (
-                    <button
-                      onClick={() =>
-                        selectOrderType(
-                          "pickup",
-                        )
-                      }
-                      className="w-full flex items-center gap-3 p-4 rounded-2xl border hover:border-(--color-primary) transition text-right"
-                    >
-                      <span className="text-2xl">
-                        🏃
-                      </span>
-
-                      <span>
-                        <span className="block font-bold">
-                          استلام من المطعم
-                        </span>
-
-                        <span className="block text-xs opacity-60">
-                          تيك أواي
-                        </span>
-                      </span>
-                    </button>
-                  )}
-
-                  {dineInEnabled &&
-                    isDineInQr && (
+                  <div className="space-y-3">
+                    {deliveryEnabled && (
                       <button
                         onClick={() =>
                           selectOrderType(
-                            "dine-in",
+                            "delivery",
                           )
                         }
-                        disabled={
-                          !canDineIn
-                        }
-                        className="w-full flex items-center gap-3 p-4 rounded-2xl border hover:border-(--color-primary) transition text-right disabled:opacity-50"
+                        className="w-full flex items-center gap-3 p-4 rounded-2xl border hover:border-(--color-primary) transition text-right"
                       >
                         <span className="text-2xl">
-                          🍽️
+                          🛵
                         </span>
 
                         <span>
                           <span className="block font-bold">
-                            طلب داخل المطعم{" "}
-                            {tableNumber
-                              ? `(طاولة ${tableNumber})`
-                              : ""}
+                            توصيل للمنزل
                           </span>
 
                           <span className="block text-xs opacity-60">
-                            {isCheckingTable
-                              ? "جاري التحقق من الطاولة..."
-                              : canDineIn
-                                ? "هيتقدملك على الطاولة"
-                                : "الطاولة غير متاحة"}
+                            هنوصلّهولك
                           </span>
                         </span>
                       </button>
                     )}
 
-                  {!deliveryEnabled &&
-                    !pickupEnabled &&
-                    !(
-                      dineInEnabled &&
-                      isDineInQr
-                    ) && (
-                      <p className="text-center opacity-60 py-6">
-                        لا توجد طرق طلب
-                        متاحة حاليًا.
-                      </p>
+                    {pickupEnabled && (
+                      <button
+                        onClick={() =>
+                          selectOrderType(
+                            "pickup",
+                          )
+                        }
+                        className="w-full flex items-center gap-3 p-4 rounded-2xl border hover:border-(--color-primary) transition text-right"
+                      >
+                        <span className="text-2xl">
+                          🏃
+                        </span>
+
+                        <span>
+                          <span className="block font-bold">
+                            استلام من المطعم
+                          </span>
+
+                          <span className="block text-xs opacity-60">
+                            تيك أواي
+                          </span>
+                        </span>
+                      </button>
                     )}
-                </div>
-              )}
+
+                    {dineInEnabled &&
+                      isDineInQr && (
+                        <button
+                          onClick={() =>
+                            selectOrderType(
+                              "dine-in",
+                            )
+                          }
+                          disabled={
+                            !canDineIn
+                          }
+                          className="w-full flex items-center gap-3 p-4 rounded-2xl border hover:border-(--color-primary) transition text-right disabled:opacity-50"
+                        >
+                          <span className="text-2xl">
+                            🍽️
+                          </span>
+
+                          <span>
+                            <span className="block font-bold">
+                              طلب داخل المطعم{" "}
+                              {tableNumber
+                                ? `(طاولة ${tableNumber})`
+                                : ""}
+                            </span>
+
+                            <span className="block text-xs opacity-60">
+                              {isCheckingTable
+                                ? "جاري التحقق من الطاولة..."
+                                : canDineIn
+                                  ? "هيتقدملك على الطاولة"
+                                  : "الطاولة غير متاحة"}
+                            </span>
+                          </span>
+                        </button>
+                      )}
+
+                    {!deliveryEnabled &&
+                      !pickupEnabled &&
+                      !(
+                        dineInEnabled &&
+                        isDineInQr
+                      ) && (
+                        <p className="text-center opacity-60 py-6">
+                          لا توجد طرق طلب
+                          متاحة حاليًا.
+                        </p>
+                      )}
+                  </div>
+                )}
 
               {orderType !==
                 "select" &&
                 !showReview && (
                   <div className="space-y-4">
                     {orderType ===
-                    "dine-in" ? (
+                      "dine-in" ? (
                       <div className="bg-(--color-background) rounded-xl p-4 text-sm">
                         طلبك هيتقدملك
                         على طاولة رقم{" "}
@@ -1906,122 +1909,120 @@ function App() {
 
                     {orderType ===
                       "delivery" && (
-                      <>
-                        <div>
-                          <label className="block text-sm font-medium mb-1">
-                            منطقة التوصيل
-                          </label>
+                        <>
+                          <div>
+                            <label className="block text-sm font-medium mb-1">
+                              منطقة التوصيل
+                            </label>
 
-                          <select
-                            value={
-                              customerInfo.deliveryArea
-                            }
-                            onChange={(e) =>
-                              updateCustomerInfo(
-                                "deliveryArea",
-                                e.target.value,
-                              )
-                            }
-                            className="w-full border rounded-xl px-3 py-2.5 outline-none bg-(--color-card)"
-                          >
-                            <option value="">
-                              اختر المنطقة...
-                            </option>
+                            <select
+                              value={
+                                customerInfo.deliveryArea
+                              }
+                              onChange={(e) =>
+                                updateCustomerInfo(
+                                  "deliveryArea",
+                                  e.target.value,
+                                )
+                              }
+                              className="w-full border rounded-xl px-3 py-2.5 outline-none bg-(--color-card)"
+                            >
+                              <option value="">
+                                اختر المنطقة...
+                              </option>
 
-                            {deliveryAreas.map(
-                              (area) => (
-                                <option
-                                  key={
-                                    area.id
-                                  }
-                                  value={
-                                    area.name
-                                  }
-                                >
-                                  {area.name} —{" "}
-                                  {area.price}{" "}
-                                  ج.م
-                                </option>
-                              ),
+                              {deliveryAreas.map(
+                                (area) => (
+                                  <option
+                                    key={
+                                      area.id
+                                    }
+                                    value={
+                                      area.name
+                                    }
+                                  >
+                                    {area.name} —{" "}
+                                    {area.price}{" "}
+                                    ج.م
+                                  </option>
+                                ),
+                              )}
+                            </select>
+
+                            {isLoadingDeliveryAreas && (
+                              <p className="text-xs opacity-60 mt-1">
+                                جاري تحميل مناطق
+                                التوصيل...
+                              </p>
                             )}
-                          </select>
+                          </div>
 
-                          {isLoadingDeliveryAreas && (
-                            <p className="text-xs opacity-60 mt-1">
-                              جاري تحميل مناطق
-                              التوصيل...
-                            </p>
-                          )}
-                        </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-1">
+                              العنوان بالتفصيل
+                            </label>
 
-                        <div>
-                          <label className="block text-sm font-medium mb-1">
-                            العنوان بالتفصيل
-                          </label>
+                            <textarea
+                              value={
+                                customerInfo.address
+                              }
+                              onChange={(e) =>
+                                updateCustomerInfo(
+                                  "address",
+                                  e.target.value,
+                                )
+                              }
+                              rows={2}
+                              className="w-full border rounded-xl px-3 py-2.5 outline-none"
+                            />
+                          </div>
 
-                          <textarea
-                            value={
-                              customerInfo.address
-                            }
-                            onChange={(e) =>
-                              updateCustomerInfo(
-                                "address",
-                                e.target.value,
-                              )
-                            }
-                            rows={2}
-                            className="w-full border rounded-xl px-3 py-2.5 outline-none"
-                          />
-                        </div>
+                          {cashPaymentEnabled &&
+                            onlinePaymentEnabled && (
+                              <div>
+                                <label className="block text-sm font-medium mb-2">
+                                  طريقة الدفع
+                                </label>
 
-                        {cashPaymentEnabled &&
-                          onlinePaymentEnabled && (
-                            <div>
-                              <label className="block text-sm font-medium mb-2">
-                                طريقة الدفع
-                              </label>
+                                <div className="flex gap-3">
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      updateCustomerInfo(
+                                        "paymentMethod",
+                                        "cash",
+                                      )
+                                    }
+                                    className={`flex-1 py-2.5 rounded-xl border font-medium ${customerInfo.paymentMethod ===
+                                        "cash"
+                                        ? "bg-(--color-primary) text-white border-(--color-primary)"
+                                        : ""
+                                      }`}
+                                  >
+                                    كاش عند الاستلام
+                                  </button>
 
-                              <div className="flex gap-3">
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    updateCustomerInfo(
-                                      "paymentMethod",
-                                      "cash",
-                                    )
-                                  }
-                                  className={`flex-1 py-2.5 rounded-xl border font-medium ${
-                                    customerInfo.paymentMethod ===
-                                    "cash"
-                                      ? "bg-(--color-primary) text-white border-(--color-primary)"
-                                      : ""
-                                  }`}
-                                >
-                                  كاش عند الاستلام
-                                </button>
-
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    updateCustomerInfo(
-                                      "paymentMethod",
-                                      "online",
-                                    )
-                                  }
-                                  className={`flex-1 py-2.5 rounded-xl border font-medium ${
-                                    customerInfo.paymentMethod ===
-                                    "online"
-                                      ? "bg-(--color-primary) text-white border-(--color-primary)"
-                                      : ""
-                                  }`}
-                                >
-                                  دفع أونلاين
-                                </button>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      updateCustomerInfo(
+                                        "paymentMethod",
+                                        "online",
+                                      )
+                                    }
+                                    className={`flex-1 py-2.5 rounded-xl border font-medium ${customerInfo.paymentMethod ===
+                                        "online"
+                                        ? "bg-(--color-primary) text-white border-(--color-primary)"
+                                        : ""
+                                      }`}
+                                  >
+                                    دفع أونلاين
+                                  </button>
+                                </div>
                               </div>
-                            </div>
-                          )}
-                      </>
-                    )}
+                            )}
+                        </>
+                      )}
 
                     <div>
                       <label className="block text-sm font-medium mb-1">
@@ -2088,17 +2089,17 @@ function App() {
 
                       {orderType ===
                         "delivery" && (
-                        <div className="flex items-center justify-between">
-                          <span>
-                            التوصيل
-                          </span>
+                          <div className="flex items-center justify-between">
+                            <span>
+                              التوصيل
+                            </span>
 
-                          <span>
-                            {deliveryPrice}{" "}
-                            ج.م
-                          </span>
-                        </div>
-                      )}
+                            <span>
+                              {deliveryPrice}{" "}
+                              ج.م
+                            </span>
+                          </div>
+                        )}
 
                       <div className="flex items-center justify-between font-bold text-base pt-1">
                         <span>
@@ -2113,7 +2114,7 @@ function App() {
 
                     <div className="border-t pt-3 text-sm space-y-1 opacity-80">
                       {orderType ===
-                      "dine-in" ? (
+                        "dine-in" ? (
                         <p>
                           طاولة رقم{" "}
                           {tableNumber}
@@ -2139,28 +2140,28 @@ function App() {
 
                       {orderType ===
                         "delivery" && (
-                        <>
-                          <p>
-                            {
-                              customerInfo.deliveryArea
-                            }
-                          </p>
+                          <>
+                            <p>
+                              {
+                                customerInfo.deliveryArea
+                              }
+                            </p>
 
-                          <p>
-                            {
-                              customerInfo.address
-                            }
-                          </p>
+                            <p>
+                              {
+                                customerInfo.address
+                              }
+                            </p>
 
-                          <p>
-                            الدفع:{" "}
-                            {customerInfo.paymentMethod ===
-                            "online"
-                              ? "أونلاين"
-                              : "كاش عند الاستلام"}
-                          </p>
-                        </>
-                      )}
+                            <p>
+                              الدفع:{" "}
+                              {customerInfo.paymentMethod ===
+                                "online"
+                                ? "أونلاين"
+                                : "كاش عند الاستلام"}
+                            </p>
+                          </>
+                        )}
 
                       {customerInfo.notes && (
                         <p>
@@ -2177,40 +2178,40 @@ function App() {
 
             {orderType !==
               "select" && (
-              <div className="p-4 border-t flex gap-3">
-                <button
-                  onClick={
-                    showReview
-                      ? () =>
+                <div className="p-4 border-t flex gap-3">
+                  <button
+                    onClick={
+                      showReview
+                        ? () =>
                           setShowReview(
                             false,
                           )
-                      : backToTypeSelect
-                  }
-                  className="flex-1 py-3 rounded-xl border font-bold"
-                >
-                  رجوع
-                </button>
+                        : backToTypeSelect
+                    }
+                    className="flex-1 py-3 rounded-xl border font-bold"
+                  >
+                    رجوع
+                  </button>
 
-                <button
-                  onClick={
-                    showReview
-                      ? confirmOrder
-                      : proceedToReview
-                  }
-                  disabled={
-                    isSubmitting
-                  }
-                  className="flex-1 py-3 rounded-xl bg-(--color-primary) text-white font-bold disabled:opacity-50"
-                >
-                  {showReview
-                    ? isSubmitting
-                      ? "جاري الإرسال..."
-                      : "تأكيد الطلب"
-                    : "التالي"}
-                </button>
-              </div>
-            )}
+                  <button
+                    onClick={
+                      showReview
+                        ? confirmOrder
+                        : proceedToReview
+                    }
+                    disabled={
+                      isSubmitting
+                    }
+                    className="flex-1 py-3 rounded-xl bg-(--color-primary) text-white font-bold disabled:opacity-50"
+                  >
+                    {showReview
+                      ? isSubmitting
+                        ? "جاري الإرسال..."
+                        : "تأكيد الطلب"
+                      : "التالي"}
+                  </button>
+                </div>
+              )}
           </div>
         </div>
       )}
@@ -2270,69 +2271,66 @@ function App() {
 
                 {orderStatus !==
                   "cancelled" && (
-                  <div className="space-y-0">
-                    {trackingSteps.map(
-                      (
-                        step,
-                        index,
-                      ) => {
-                        const isDone =
-                          currentStepIndex >=
+                    <div className="space-y-0">
+                      {trackingSteps.map(
+                        (
+                          step,
+                          index,
+                        ) => {
+                          const isDone =
+                            currentStepIndex >=
                             0 &&
-                          index <=
+                            index <=
                             currentStepIndex
 
-                        return (
-                          <div
-                            key={
-                              step.status
-                            }
-                            className="flex items-start gap-3"
-                          >
-                            <div className="flex flex-col items-center">
-                              <div
-                                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
-                                  isDone
-                                    ? "bg-(--color-primary) text-white"
-                                    : "bg-gray-200 text-gray-400"
-                                }`}
-                              >
-                                {isDone
-                                  ? "✓"
-                                  : index +
+                          return (
+                            <div
+                              key={
+                                step.status
+                              }
+                              className="flex items-start gap-3"
+                            >
+                              <div className="flex flex-col items-center">
+                                <div
+                                  className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${isDone
+                                      ? "bg-(--color-primary) text-white"
+                                      : "bg-gray-200 text-gray-400"
+                                    }`}
+                                >
+                                  {isDone
+                                    ? "✓"
+                                    : index +
                                     1}
+                                </div>
+
+                                {index <
+                                  trackingSteps.length -
+                                  1 && (
+                                    <div
+                                      className={`w-0.5 h-8 ${isDone
+                                          ? "bg-(--color-primary)"
+                                          : "bg-gray-200"
+                                        }`}
+                                    />
+                                  )}
                               </div>
 
-                              {index <
-                                trackingSteps.length -
-                                  1 && (
-                                <div
-                                  className={`w-0.5 h-8 ${
-                                    isDone
-                                      ? "bg-(--color-primary)"
-                                      : "bg-gray-200"
+                              <p
+                                className={`text-sm pt-0.5 ${isDone
+                                    ? "font-bold"
+                                    : "opacity-50"
                                   }`}
-                                />
-                              )}
+                              >
+                                {
+                                  step.label
+                                }
+                              </p>
                             </div>
-
-                            <p
-                              className={`text-sm pt-0.5 ${
-                                isDone
-                                  ? "font-bold"
-                                  : "opacity-50"
-                              }`}
-                            >
-                              {
-                                step.label
-                              }
-                            </p>
-                          </div>
-                        )
-                      },
-                    )}
-                  </div>
-                )}
+                          )
+                        },
+                      )}
+                    </div>
+                  )}
 
                 {isTrackingFinished ? (
                   <button
@@ -2366,102 +2364,102 @@ function App() {
 
       {showCancel &&
         canCancelOrder && (
-        <div className="fixed inset-0 z-60 flex items-end md:items-center justify-center">
-          <div
-            className="absolute inset-0 bg-black/50"
-            onClick={() =>
-              !isCancelling &&
-              setShowCancel(false)
-            }
-          />
+          <div className="fixed inset-0 z-60 flex items-end md:items-center justify-center">
+            <div
+              className="absolute inset-0 bg-black/50"
+              onClick={() =>
+                !isCancelling &&
+                setShowCancel(false)
+              }
+            />
 
-          <div className="relative bg-(--color-card) w-full md:max-w-md md:rounded-2xl rounded-t-3xl shadow-2xl">
-            <div className="flex items-center justify-between p-4 border-b">
-              <h2 className="font-black text-lg">
-                إلغاء الطلب
-              </h2>
+            <div className="relative bg-(--color-card) w-full md:max-w-md md:rounded-2xl rounded-t-3xl shadow-2xl">
+              <div className="flex items-center justify-between p-4 border-b">
+                <h2 className="font-black text-lg">
+                  إلغاء الطلب
+                </h2>
 
-              <button
-                onClick={() =>
-                  setShowCancel(false)
-                }
-                disabled={
-                  isCancelling
-                }
-                className="w-9 h-9 rounded-full hover:bg-(--color-background) disabled:opacity-50"
-                aria-label="إغلاق"
-              >
-                ✕
-              </button>
-            </div>
+                <button
+                  onClick={() =>
+                    setShowCancel(false)
+                  }
+                  disabled={
+                    isCancelling
+                  }
+                  className="w-9 h-9 rounded-full hover:bg-(--color-background) disabled:opacity-50"
+                  aria-label="إغلاق"
+                >
+                  ✕
+                </button>
+              </div>
 
-            <div className="p-4 space-y-3">
-              <p className="text-sm opacity-70">
-                ليه عايز تلغي الطلب؟
-              </p>
+              <div className="p-4 space-y-3">
+                <p className="text-sm opacity-70">
+                  ليه عايز تلغي الطلب؟
+                </p>
 
-              {CANCEL_REASONS.map(
-                (reason) => (
-                  <label
-                    key={reason}
-                    className="flex items-center gap-3 p-3 rounded-xl border cursor-pointer"
-                  >
-                    <input
-                      type="radio"
-                      name="cancel-reason"
-                      checked={
-                        cancelReason ===
-                        reason
-                      }
-                      onChange={() =>
-                        setCancelReason(
-                          reason,
+                {CANCEL_REASONS.map(
+                  (reason) => (
+                    <label
+                      key={reason}
+                      className="flex items-center gap-3 p-3 rounded-xl border cursor-pointer"
+                    >
+                      <input
+                        type="radio"
+                        name="cancel-reason"
+                        checked={
+                          cancelReason ===
+                          reason
+                        }
+                        onChange={() =>
+                          setCancelReason(
+                            reason,
+                          )
+                        }
+                        className="w-4 h-4 accent-(--color-primary)"
+                      />
+
+                      <span className="text-sm">
+                        {reason}
+                      </span>
+                    </label>
+                  ),
+                )}
+
+                {cancelReason ===
+                  OTHER_CANCEL_REASON && (
+                    <textarea
+                      value={cancelNote}
+                      onChange={(e) =>
+                        setCancelNote(
+                          e.target.value,
                         )
                       }
-                      className="w-4 h-4 accent-(--color-primary)"
+                      placeholder="اكتب السبب..."
+                      rows={2}
+                      className="w-full border rounded-xl px-3 py-2.5 outline-none"
                     />
+                  )}
+              </div>
 
-                    <span className="text-sm">
-                      {reason}
-                    </span>
-                  </label>
-                ),
-              )}
-
-              {cancelReason ===
-                OTHER_CANCEL_REASON && (
-                <textarea
-                  value={cancelNote}
-                  onChange={(e) =>
-                    setCancelNote(
-                      e.target.value,
-                    )
+              <div className="p-4 border-t">
+                <button
+                  onClick={
+                    cancelOrder
                   }
-                  placeholder="اكتب السبب..."
-                  rows={2}
-                  className="w-full border rounded-xl px-3 py-2.5 outline-none"
-                />
-              )}
-            </div>
-
-            <div className="p-4 border-t">
-              <button
-                onClick={
-                  cancelOrder
-                }
-                disabled={
-                  isCancelling
-                }
-                className="w-full py-3 rounded-xl bg-red-600 text-white font-bold disabled:opacity-50"
-              >
-                {isCancelling
-                  ? "جاري الإلغاء..."
-                  : "تأكيد الإلغاء"}
-              </button>
+                  disabled={
+                    isCancelling
+                  }
+                  className="w-full py-3 rounded-xl bg-red-600 text-white font-bold disabled:opacity-50"
+                >
+                  {isCancelling
+                    ? "جاري الإلغاء..."
+                    : "تأكيد الإلغاء"}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
     </div>
   )
 }
