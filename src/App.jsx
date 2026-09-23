@@ -598,6 +598,17 @@ function App() {
       () => readActiveOrder() !== null,
     )
 
+  // لما الطلب يوصل لحالة نهائية (تم التسليم / ملغي)، نمسحه من
+  // localStorage عشان مايظهرش تاني عند عمل Reload للصفحة
+  useEffect(() => {
+    if (
+      orderStatus === "delivered" ||
+      orderStatus === "cancelled"
+    ) {
+      removeActiveOrder()
+    }
+  }, [orderStatus])
+
   // ========================================
   // Cancel Order
   // ========================================
@@ -1124,7 +1135,7 @@ function App() {
             لا توجد منتجات مطابقة.
           </div>
         ) : (
-          <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+          <div className="mt-6 flex flex-col gap-3 sm:grid sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
             {filteredProducts.map(
               (product) => {
                 const cartItem =
@@ -1164,6 +1175,9 @@ function App() {
       <FloatingActions
         cartItemsCount={
           cartItemsCount
+        }
+        cartTotal={
+          cartTotal
         }
         onOpenCart={() =>
           setIsCartOpen(true)

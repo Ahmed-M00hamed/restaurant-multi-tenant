@@ -5,65 +5,73 @@ export default function Header({
     restaurantCover,
     restaurantPhone,
     isOpen,
-    overlay,
 }) {
     return (
-        <header className="relative overflow-hidden">
-            {restaurantCover && (
+        <header className="relative overflow-hidden rounded-b-4xl text-white shadow-md">
+            {restaurantCover ? (
                 <img
                     src={restaurantCover}
                     alt={restaurantName}
                     className="absolute inset-0 h-full w-full object-cover"
                 />
+            ) : (
+                <div className="absolute inset-0 bg-(--color-primary)" />
             )}
 
-            <div
-                className="absolute inset-0"
-                style={{
-                    background: overlay,
-                }}
-            />
+            {/* تعتيم متدرّج أفقي: غامق عند اليمين (مكان الكلام) وبيفتح تدريجيًا ناحية الشمال */}
+            <div className="absolute inset-0 bg-linear-to-l from-black/90 via-black/50 to-transparent" />
 
-            <div className="relative mx-auto flex min-h-[220px] max-w-7xl items-center px-4 py-10 sm:px-6 lg:px-8">
-                <div className="flex w-full flex-col items-center text-center text-white">
-                    {restaurantLogo && (
-                        <img
-                            src={restaurantLogo}
-                            alt={restaurantName}
-                            className="mb-4 h-24 w-24 rounded-full border-4 border-white/80 bg-white object-cover shadow-lg"
-                        />
-                    )}
+            <div className="relative mx-auto max-w-md px-5 pb-6 pt-5 sm:max-w-3xl lg:max-w-6xl">
+                {/* الشعار + الاسم */}
+                <div className="flex items-center gap-3">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/15 ring-2 ring-white/50">
+                        {restaurantLogo ? (
+                            <img
+                                src={restaurantLogo}
+                                alt={restaurantName}
+                                className="h-full w-full object-cover"
+                            />
+                        ) : (
+                            <span className="text-2xl">🍽️</span>
+                        )}
+                    </div>
 
-                    <h1 className="text-3xl font-bold sm:text-4xl">
-                        {restaurantName}
-                    </h1>
+                    <div className="min-w-0">
+                        <h1 className="truncate text-xl font-extrabold sm:text-2xl">
+                            {restaurantName}
+                        </h1>
+                        <p className="truncate text-sm text-white/80">
+                            Restaurant
+                        </p>
+                    </div>
+                </div>
 
-                    {restaurantDescription && (
-                        <p className="mt-2 max-w-2xl text-sm text-white/90 sm:text-base">
+                {/* الوصف + الحالة */}
+                <div className="mt-5">
+                    {restaurantDescription ? (
+                        <p className="text-base font-bold leading-snug sm:text-lg">
                             {restaurantDescription}
+                        </p>
+                    ) : (
+                        <p className="text-base font-bold leading-snug sm:text-lg">
+                            أشهى الأطباق
+                            <br />
+                            بأفضل جودة
                         </p>
                     )}
 
-                    <div className="mt-4">
-                        <span
-                            className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold ${isOpen
-                                    ? "bg-green-500/90 text-white"
-                                    : "bg-red-500/90 text-white"
-                                }`}
-                        >
-                            <span
-                                className={`me-2 h-2.5 w-2.5 rounded-full ${isOpen ? "bg-white" : "bg-white"
-                                    }`}
-                            />
-
-                            {isOpen ? "مفتوح الآن" : "مغلق الآن"}
-                        </span>
-                    </div>
+                    <span
+                        className={`mt-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold text-white ${isOpen ? "bg-green-500" : "bg-red-500"
+                            }`}
+                    >
+                        <span className="h-2 w-2 rounded-full bg-white" />
+                        {isOpen ? "مفتوح الآن" : "مغلق الآن"}
+                    </span>
 
                     {restaurantPhone && (
                         <a
                             href={`tel:${restaurantPhone}`}
-                            className="mt-3 text-sm text-white/90 transition hover:text-white"
+                            className="mt-2 block text-xs text-white/85 hover:text-white"
                         >
                             {restaurantPhone}
                         </a>

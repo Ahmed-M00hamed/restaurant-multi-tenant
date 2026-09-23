@@ -1,55 +1,61 @@
+function CartIcon() {
+    return (
+        <svg
+            className="h-5 w-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <path d="M6 7h12l1 13H5L6 7Z" />
+            <path d="M9 7a3 3 0 0 1 6 0" />
+        </svg>
+    )
+}
+
 export default function FloatingActions({
     cartItemsCount,
+    cartTotal,
     onOpenCart,
     onOpenTracking,
 }) {
     return (
-        <div className="fixed bottom-5 start-4 z-40 flex flex-col gap-3">
+        <div className="fixed inset-x-4 bottom-4 z-40 mx-auto flex max-w-md flex-col gap-2 md:max-w-xl">
             {onOpenTracking && (
                 <button
                     type="button"
                     onClick={onOpenTracking}
-                    className="flex h-12 w-12 items-center justify-center rounded-full bg-(--color-card) text-(--color-primary) shadow-lg ring-1 ring-black/10 transition hover:scale-105"
-                    aria-label="تتبع الطلب"
-                    title="تتبع الطلب"
+                    className="flex w-full items-center justify-center gap-2 rounded-2xl bg-(--color-card) py-3 text-sm font-bold text-(--color-primary) shadow-lg ring-1 ring-black/10"
                 >
-                    <svg
-                        className="h-5 w-5"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                    >
-                        <path d="M3 12h18" />
-                        <path d="M13 5l7 7-7 7" />
-                    </svg>
+                    📦 تتبع الطلب
                 </button>
             )}
 
-            <button
-                type="button"
-                onClick={onOpenCart}
-                className="relative flex h-14 w-14 items-center justify-center rounded-full bg-(--color-primary) text-white shadow-lg transition hover:scale-105"
-                aria-label="السلة"
-                title="السلة"
-            >
-                <svg
-                    className="h-6 w-6"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
+            {cartItemsCount > 0 && (
+                <button
+                    type="button"
+                    onClick={onOpenCart}
+                    className="flex w-full items-center justify-between gap-3 rounded-2xl bg-(--color-primary) px-5 py-4 text-white shadow-lg transition hover:opacity-90"
                 >
-                    <path d="M6 7h12l1 13H5L6 7Z" />
-                    <path d="M9 7a3 3 0 0 1 6 0" />
-                </svg>
-
-                {cartItemsCount > 0 && (
-                    <span className="absolute -end-1 -top-1 flex h-6 min-w-6 items-center justify-center rounded-full bg-red-500 px-1 text-xs font-bold text-white">
-                        {cartItemsCount > 99 ? "99+" : cartItemsCount}
+                    <span className="flex items-center gap-2 font-bold">
+                        <CartIcon />
+                        اطلب الآن
                     </span>
-                )}
-            </button>
+
+                    <span className="flex items-center gap-2 text-sm font-bold">
+                        <span className="rounded-full bg-white/20 px-2 py-0.5">
+                            {cartItemsCount > 99 ? "99+" : cartItemsCount}
+                        </span>
+                        {cartTotal !== undefined && (
+                            <span>
+                                {Number(cartTotal).toLocaleString("ar-EG")} جنيه
+                            </span>
+                        )}
+                    </span>
+                </button>
+            )}
         </div>
     )
 }
