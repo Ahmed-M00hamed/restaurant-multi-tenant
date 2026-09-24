@@ -115,7 +115,7 @@ export default function OrderTracking({
     const canCancel = CANCELLABLE_STATUSES.includes(orderStatus)
 
     return (
-        <div className="fixed inset-0 z-[60] overflow-y-auto">
+        <div className="fixed inset-0 z-60 overflow-y-auto">
             <button
                 type="button"
                 onClick={onClose}

@@ -547,7 +547,7 @@ export default function OrderFlow({
                                 type="button"
                                 onClick={onSubmit}
                                 disabled={!canSubmit || isSubmitting}
-                                className="flex-[2] rounded-2xl bg-(--color-primary) px-4 py-3.5 text-sm font-bold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                                className="flex-2 rounded-2xl bg-(--color-primary) px-4 py-3.5 text-sm font-bold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
                             >
                                 {isSubmitting ? "جاري إرسال الطلب..." : "تأكيد الطلب"}
                             </button>

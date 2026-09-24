@@ -13,7 +13,7 @@ export default function MenuSearch({
             />
 
             <svg
-                className="pointer-events-none absolute end-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
+                className="pointer-events-none absolute inset-e-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"

@@ -23,7 +23,7 @@ export default function CartDrawer({
             />
 
             {/* Drawer */}
-            <aside className="absolute end-0 top-0 flex h-full w-full max-w-md flex-col bg-(--color-background,white) shadow-2xl">
+            <aside className="absolute inset-e-0 top-0 flex h-full w-full max-w-md flex-col bg-(--color-background,white) shadow-2xl">
                 {/* Header */}
                 <div className="flex items-center justify-between border-b border-black/10 px-5 py-4">
                     <div>

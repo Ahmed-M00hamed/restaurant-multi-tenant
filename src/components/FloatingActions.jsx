@@ -22,7 +22,7 @@ export default function FloatingActions({
     onOpenTracking,
 }) {
     return (
-        <div className="fixed inset-x-4 bottom-4 z-40 mx-auto flex max-w-md flex-col gap-2 md:max-w-xl">
+        <div className="fixed inset-x-4 bottom-4 right-0 z-40 mx-auto flex max-w-60 flex-col gap-2 md:max-w-150">
             {onOpenTracking && (
                 <button
                     type="button"
@@ -37,7 +37,7 @@ export default function FloatingActions({
                 <button
                     type="button"
                     onClick={onOpenCart}
-                    className="flex w-full items-center justify-between gap-3 rounded-2xl bg-(--color-primary) px-5 py-4 text-white shadow-lg transition hover:opacity-90"
+                    className="flex items-center justify-between gap-3 rounded-2xl bg-(--color-primary) px-5 py-4 text-white shadow-lg transition hover:opacity-90"
                 >
                     <span className="flex items-center gap-2 font-bold">
                         <CartIcon />
