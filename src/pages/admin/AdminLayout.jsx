@@ -104,7 +104,10 @@ function AdminLayout() {
                 if (active) {
                     setAuthData({
                         user: currentSession.user,
-                        role: roleData?.role || "admin",
+                        // ما نديش "admin" افتراضيًا لو مفيش صف حقيقي في
+                        // user_roles، عشان أي حساب متسجل بدون صلاحية
+                        // معينة ميتعاملش معاه كإنه أدمن
+                        role: roleData?.role || null,
                         restaurant_id: roleData?.restaurant_id || null,
                     })
                 }
@@ -448,6 +451,12 @@ function AdminLayout() {
     // لوحة تحكم المطاعم دي لأصحاب المطاعم بس؛ صاحب المنصة له لوحته الخاصة
     if (authData?.role === "super_admin") {
         return <Navigate to="/super-admin" replace />
+    }
+
+    // أي حساب متسجل دخول بس مالوش صف "admin" حقيقي في user_roles
+    // (يعني مش صاحب مطعم فعلي) بنرجّعه لصفحة تسجيل الدخول
+    if (authData && authData.role !== "admin") {
+        return <Navigate to="/admin/login" replace />
     }
 
     const ordersBadge = pendingCount > 0 && (

@@ -1149,7 +1149,7 @@ export default function SuperAdminDashboard() {
                             disabled={
                                 addingRestaurant
                             }
-                            className="bg-gray-900 hover:bg-black disabled:opacity-50 text-white p-3 rounded-lg font-bold transition"
+                            className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white p-3 rounded-lg font-bold transition"
                         >
                             {addingRestaurant
                                 ? 'جاري إنشاء المطعم...'
@@ -1330,7 +1330,7 @@ export default function SuperAdminDashboard() {
                                                                 disabled={
                                                                     isDeleting
                                                                 }
-                                                                className="bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50 px-3 py-2 rounded-lg text-sm font-semibold"
+                                                                className="bg-gray-100 text-black-700 hover:bg-gray-200 disabled:opacity-50 px-3 py-2 rounded-lg text-sm font-semibold"
                                                             >
                                                                 {
                                                                     restaurant.is_active

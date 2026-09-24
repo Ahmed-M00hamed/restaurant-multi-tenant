@@ -609,6 +609,20 @@ function App() {
     }
   }, [orderStatus])
 
+  // لما الطلب "يتم تسليمه"، نسكّر صفحة التتبع تلقائيًا بعد
+  // كام ثانية (عشان العميل يشوف رسالة التأكيد الأول)
+  useEffect(() => {
+    if (orderStatus !== "delivered") {
+      return
+    }
+
+    const timer = setTimeout(() => {
+      setIsTrackingOpen(false)
+    }, 4000)
+
+    return () => clearTimeout(timer)
+  }, [orderStatus])
+
   // ========================================
   // Cancel Order
   // ========================================

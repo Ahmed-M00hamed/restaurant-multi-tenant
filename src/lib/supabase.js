@@ -10,11 +10,7 @@ export const supabase = createClient(
 );
 
 export async function getCurrentUserRole() {
-    const { data: { user }, error: userError } =
-        await supabase.auth.getUser();
-
-    console.log("CURRENT USER:", user);
-    console.log("USER ERROR:", userError);
+    const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) return null;
 
@@ -24,19 +20,12 @@ export async function getCurrentUserRole() {
         .eq('user_id', user.id)
         .maybeSingle();
 
-    console.log("USER ROLE:", data);
-    console.log("ROLE ERROR:", error);
-
-    const { data: isAdmin, error: adminError } =
-        await supabase.rpc('is_admin');
-
-    console.log("IS ADMIN:", isAdmin);
-    console.log("ADMIN ERROR:", adminError);
-
     if (error || !data) {
+        // مفيش صف في user_roles لليوزر ده = محدش أدمن، منسيبهوش
+        // يعدّي كـ "admin" بالغلط
         return {
             user,
-            role: 'authenticated',
+            role: null,
             restaurant_id: null
         };
     }
