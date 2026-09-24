@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react"
-import { useOutletContext } from "react-router-dom"
+import { useOutletContext, useSearchParams } from "react-router-dom"
 import { supabase } from "../../lib/supabase"
 import { buildWhatsAppLink } from "../../lib/whatsapp"
 import { ORDERS_CHANGED_EVENT } from "./useNewOrderAlerts"
@@ -21,6 +21,9 @@ function AdminOrders() {
     const [orderTypeFilter, setOrderTypeFilter] = useState("all")
 
     const [restaurantName, setRestaurantName] = useState("")
+
+    const [searchParams, setSearchParams] = useSearchParams()
+
 
     // silent = تحديث في الخلفية من غير شاشة "جاري التحميل"
     const loadOrders = async (silent = false) => {
@@ -215,6 +218,40 @@ function AdminOrders() {
             currentId === orderId ? null : orderId
         )
     }
+
+    // فتح طلب معيّن جاي من رابط تنبيه "طلب جديد" مباشرة
+    // (مثال: /admin/orders?order=xxxx)
+    useEffect(() => {
+        const targetOrderId = searchParams.get("order")
+
+        if (!targetOrderId) {
+            return
+        }
+
+        const orderExists = orders.some(
+            (order) => order.id === targetOrderId
+        )
+
+        if (!orderExists) {
+            return
+        }
+
+        setOpenOrderId(targetOrderId)
+
+        // ننضف البارامتر من الرابط عشان الصفحة تفضل نضيفة
+        setSearchParams({}, { replace: true })
+
+        const timer = setTimeout(() => {
+            document
+                .getElementById(`order-${targetOrderId}`)
+                ?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                })
+        }, 250)
+
+        return () => clearTimeout(timer)
+    }, [orders, searchParams, setSearchParams])
 
     /*
     |--------------------------------------------------------------------------
@@ -991,6 +1028,7 @@ function AdminOrders() {
                             return (
                                 <div
                                     key={order.id}
+                                    id={`order-${order.id}`}
                                     className={`bg-(--color-card) rounded-2xl shadow-sm border transition-all ${
                                         isOpen
                                             ? "border-(--color-primary)"

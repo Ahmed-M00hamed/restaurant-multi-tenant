@@ -27,6 +27,7 @@ export default function SuperAdminDashboard() {
     const [addingAdmin, setAddingAdmin] = useState(false)
     const [deletingAdmin, setDeletingAdmin] = useState(null)
     const [deletingRestaurant, setDeletingRestaurant] = useState(null)
+    const [deletingOrdersId, setDeletingOrdersId] = useState(null)
     const [loggingOut, setLoggingOut] = useState(false)
 
     // =========================
@@ -514,6 +515,55 @@ export default function SuperAdminDashboard() {
                 )
             } finally {
                 setDeletingRestaurant(null)
+            }
+        }
+
+    // =========================
+    // Delete ALL orders of a restaurant (keep menu/settings)
+    // =========================
+
+    const handleDeleteAllOrders =
+        async (restaurant) => {
+            const confirmed =
+                window.confirm(
+                    `⚠️ تحذير\n\nهل أنت متأكد من مسح جميع طلبات مطعم "${restaurant.name}"؟\n\nهيتم حذف كل الطلبات نهائيًا، لكن المنيو والمنتجات والإعدادات هتفضل زي ما هي من غير أي تغيير.\n\nهذا الإجراء لا يمكن التراجع عنه.`
+                )
+
+            if (!confirmed) return
+
+            setError('')
+            setSuccess('')
+            setDeletingOrdersId(restaurant.id)
+
+            try {
+                const { data, error } =
+                    await supabase.rpc(
+                        'delete_restaurant_orders',
+                        {
+                            p_restaurant_id:
+                                restaurant.id,
+                        }
+                    )
+
+                if (error) {
+                    throw error
+                }
+
+                setSuccess(
+                    `تم مسح جميع طلبات مطعم "${restaurant.name}" (${data?.deleted_count ?? 0} طلب).`
+                )
+            } catch (err) {
+                console.error(
+                    'DELETE RESTAURANT ORDERS ERROR:',
+                    err
+                )
+
+                setError(
+                    err?.message ||
+                    'حدث خطأ أثناء مسح طلبات المطعم.'
+                )
+            } finally {
+                setDeletingOrdersId(null)
             }
         }
 
@@ -1149,7 +1199,7 @@ export default function SuperAdminDashboard() {
                             disabled={
                                 addingRestaurant
                             }
-                            className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white p-3 rounded-lg font-bold transition"
+                            className="bg-gray-900 hover:bg-black disabled:opacity-50 text-white p-3 rounded-lg font-bold transition"
                         >
                             {addingRestaurant
                                 ? 'جاري إنشاء المطعم...'
@@ -1330,13 +1380,35 @@ export default function SuperAdminDashboard() {
                                                                 disabled={
                                                                     isDeleting
                                                                 }
-                                                                className="bg-gray-100 text-black-700 hover:bg-gray-200 disabled:opacity-50 px-3 py-2 rounded-lg text-sm font-semibold"
+                                                                className="bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50 px-3 py-2 rounded-lg text-sm font-semibold"
                                                             >
                                                                 {
                                                                     restaurant.is_active
                                                                         ? 'إيقاف'
                                                                         : 'تفعيل'
                                                                 }
+                                                            </button>
+
+                                                            {/* DELETE ALL ORDERS ONLY */}
+
+                                                            <button
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    handleDeleteAllOrders(
+                                                                        restaurant
+                                                                    )
+                                                                }
+                                                                disabled={
+                                                                    isDeleting ||
+                                                                    deletingOrdersId ===
+                                                                    restaurant.id
+                                                                }
+                                                                className="bg-amber-100 text-amber-700 hover:bg-amber-200 disabled:opacity-50 px-3 py-2 rounded-lg text-sm font-semibold"
+                                                            >
+                                                                {deletingOrdersId ===
+                                                                    restaurant.id
+                                                                    ? 'جاري المسح...'
+                                                                    : 'مسح كل الطلبات'}
                                                             </button>
 
                                                             {/* DELETE */}

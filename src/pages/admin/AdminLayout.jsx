@@ -302,7 +302,7 @@ function AdminLayout() {
 
         setToasts((current) =>
             [
-                { ...order, id: toastId, kind: "cancel" },
+                { ...order, id: toastId, orderId: order.id, kind: "cancel" },
                 ...current,
             ].slice(0, 3)
         )
@@ -1003,8 +1003,13 @@ function AdminLayout() {
                             <button
                                 type="button"
                                 onClick={() => {
+                                    const targetOrderId =
+                                        toast.orderId || toast.id
+
                                     dismissToast(toast.id)
-                                    navigate("/admin/orders")
+                                    navigate(
+                                        `/admin/orders?order=${targetOrderId}`
+                                    )
                                 }}
                                 className="w-full mt-3 bg-(--color-primary) text-white py-2.5 rounded-xl font-medium"
                             >
