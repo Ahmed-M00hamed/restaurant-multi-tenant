@@ -1,54 +1,64 @@
-import { useEffect, useState } from "react";
-import { Navigate, NavLink, Outlet, useNavigate } from "react-router-dom";
-import { supabase } from "../../lib/supabase";
-import { playOrderSound, unlockAudio } from "../../lib/orderSound";
-import useNewOrderAlerts from "./useNewOrderAlerts";
-import { applyBranding, SETTINGS_CHANGED_EVENT } from "../../lib/branding";
+import { useEffect, useState } from "react"
+import {
+    Navigate,
+    NavLink,
+    Outlet,
+    useNavigate,
+} from "react-router-dom"
+import { supabase } from "../../lib/supabase"
+import { playOrderSound, unlockAudio } from "../../lib/orderSound"
+import useNewOrderAlerts from "./useNewOrderAlerts"
+import {
+    applyBranding,
+    SETTINGS_CHANGED_EVENT,
+} from "../../lib/branding"
 
-const SOUND_KEY = "menuflow_admin_sound";
-const THEME_KEY = "menuflow_admin_theme";
+const SOUND_KEY = "menuflow_admin_sound"
+const THEME_KEY = "menuflow_admin_theme"
 
 const readSoundPreference = () => {
     try {
-        return localStorage.getItem(SOUND_KEY) !== "off";
+        return localStorage.getItem(SOUND_KEY) !== "off"
     } catch {
-        return true;
+        return true
     }
-};
+}
 
 const readThemePreference = () => {
     try {
-        const saved = localStorage.getItem(THEME_KEY);
-        if (saved === "dark") return true;
-        if (saved === "light") return false;
+        const saved = localStorage.getItem(THEME_KEY)
+        if (saved === "dark") return true
+        if (saved === "light") return false
         // مفيش تفضيل محفوظ: نتبع إعدادات النظام
-        return window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
+        return window.matchMedia?.(
+            "(prefers-color-scheme: dark)"
+        ).matches ?? false
     } catch {
-        return false;
+        return false
     }
-};
+}
 
 const getOrderTypeText = (type) => {
-    if (type === "delivery") return "توصيل";
-    if (type === "pickup") return "استلام";
-    if (type === "dine-in") return "داخل المطعم";
+    if (type === "delivery") return "توصيل"
+    if (type === "pickup") return "استلام"
+    if (type === "dine-in") return "داخل المطعم"
 
-    return "";
-};
+    return ""
+}
 
 const describeOrder = (order) => {
-    const parts = [getOrderTypeText(order.order_type)];
+    const parts = [getOrderTypeText(order.order_type)]
 
     if (order.order_type === "dine-in" && order.table_number) {
-        parts.push(`طاولة ${order.table_number}`);
+        parts.push(`طاولة ${order.table_number}`)
     }
 
     if (order.total_price != null) {
-        parts.push(`${order.total_price} جنيه`);
+        parts.push(`${order.total_price} جنيه`)
     }
 
-    return parts.filter(Boolean).join(" — ");
-};
+    return parts.filter(Boolean).join(" — ")
+}
 
 // لوجو المطعم (أو أول حرف من اسمه لو مفيش لوجو)
 function BrandMark({ logo, name, className }) {
@@ -57,35 +67,39 @@ function BrandMark({ logo, name, className }) {
             className={`${className} overflow-hidden bg-(--color-primary) text-white flex items-center justify-center font-bold shrink-0`}
         >
             {logo ? (
-                <img src={logo} alt={name} className="w-full h-full object-cover" />
+                <img
+                    src={logo}
+                    alt={name}
+                    className="w-full h-full object-cover"
+                />
             ) : (
                 (name || "M").charAt(0)
             )}
         </div>
-    );
+    )
 }
 
 function AdminLayout() {
-    const navigate = useNavigate();
+    const navigate = useNavigate()
 
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
     /* ---------- جلسة الأدمن ---------- */
-    const [session, setSession] = useState(undefined);
-    const [authData, setAuthData] = useState(null);
+    const [session, setSession] = useState(undefined)
+    const [authData, setAuthData] = useState(null)
 
     useEffect(() => {
-        let active = true;
+        let active = true
 
         const updateAuthAndSession = async (currentSession) => {
-            setSession(currentSession ?? null);
+            setSession(currentSession ?? null)
             if (currentSession?.user) {
                 // جلب الصلاحيات ومعرف المطعم التابع للمستخدم
                 const { data: roleData } = await supabase
                     .from("user_roles")
                     .select("role, restaurant_id")
                     .eq("user_id", currentSession.user.id)
-                    .maybeSingle();
+                    .maybeSingle()
 
                 if (active) {
                     setAuthData({
@@ -95,28 +109,28 @@ function AdminLayout() {
                         // معينة ميتعاملش معاه كإنه أدمن
                         role: roleData?.role || null,
                         restaurant_id: roleData?.restaurant_id || null,
-                    });
+                    })
                 }
             } else if (active) {
-                setAuthData(null);
+                setAuthData(null)
             }
-        };
+        }
 
         supabase.auth.getSession().then(({ data }) => {
-            if (active) updateAuthAndSession(data.session);
-        });
+            if (active) updateAuthAndSession(data.session)
+        })
 
         const { data: listener } = supabase.auth.onAuthStateChange(
             (_event, newSession) => {
-                if (active) updateAuthAndSession(newSession);
-            },
-        );
+                if (active) updateAuthAndSession(newSession)
+            }
+        )
 
         return () => {
-            active = false;
-            listener.subscription.unsubscribe();
-        };
-    }, []);
+            active = false
+            listener.subscription.unsubscribe()
+        }
+    }, [])
 
     /* ---------- بيانات المطعم + مفتوح/مغلق ---------- */
     const [restaurant, setRestaurant] = useState({
@@ -126,15 +140,15 @@ function AdminLayout() {
         name: "",
         logo: "",
         isOpen: true,
-    });
-    const [togglingOpen, setTogglingOpen] = useState(false);
+    })
+    const [togglingOpen, setTogglingOpen] = useState(false)
 
-    const restaurantId = authData?.restaurant_id || null;
+    const restaurantId = authData?.restaurant_id || null
 
     useEffect(() => {
-        if (!restaurantId) return;
+        if (!restaurantId) return
 
-        let active = true;
+        let active = true
 
         const loadRestaurant = async () => {
             const [{ data: restRow }, { data: settingsRow }] = await Promise.all([
@@ -149,7 +163,7 @@ function AdminLayout() {
                     .eq("restaurant_id", restaurantId)
                     .limit(1)
                     .maybeSingle(),
-            ]);
+            ])
 
             if (active) {
                 setRestaurant({
@@ -159,31 +173,39 @@ function AdminLayout() {
                     name: settingsRow?.restaurant_name || restRow?.name || "",
                     logo: settingsRow?.logo_url || "",
                     isOpen: settingsRow?.is_open ?? true,
-                });
+                })
             }
-        };
-
-        loadRestaurant();
-
-        // لما الإعدادات تتحفظ (اسم / لوجو جديد)
-        window.addEventListener(SETTINGS_CHANGED_EVENT, loadRestaurant);
-
-        return () => {
-            active = false;
-            window.removeEventListener(SETTINGS_CHANGED_EVENT, loadRestaurant);
-        };
-    }, [restaurantId]);
-
-    const toggleOpen = async () => {
-        if (!restaurant.settingsId || togglingOpen) return;
-
-        const next = !restaurant.isOpen;
-
-        if (!next && !window.confirm("هتقفل استقبال الطلبات من المنيو. متأكد؟")) {
-            return;
         }
 
-        setTogglingOpen(true);
+        loadRestaurant()
+
+        // لما الإعدادات تتحفظ (اسم / لوجو جديد)
+        window.addEventListener(SETTINGS_CHANGED_EVENT, loadRestaurant)
+
+        return () => {
+            active = false
+            window.removeEventListener(
+                SETTINGS_CHANGED_EVENT,
+                loadRestaurant
+            )
+        }
+    }, [restaurantId])
+
+    const toggleOpen = async () => {
+        if (!restaurant.settingsId || togglingOpen) return
+
+        const next = !restaurant.isOpen
+
+        if (
+            !next &&
+            !window.confirm(
+                "هتقفل استقبال الطلبات من المنيو. متأكد؟"
+            )
+        ) {
+            return
+        }
+
+        setTogglingOpen(true)
 
         const { data, error } = await supabase
             .from("restaurant_settings")
@@ -192,72 +214,74 @@ function AdminLayout() {
                 updated_at: new Date().toISOString(),
             })
             .eq("id", restaurant.settingsId)
-            .select("id");
+            .select("id")
 
         if (error || !data || data.length === 0) {
-            console.error("Toggle open error:", error);
+            console.error("Toggle open error:", error)
 
             alert(
                 error?.message ||
-                "تعذر تغيير حالة المطعم. تأكد من صلاحيات التعديل في Supabase.",
-            );
+                "تعذر تغيير حالة المطعم. تأكد من صلاحيات التعديل في Supabase."
+            )
         } else {
             setRestaurant((current) => ({
                 ...current,
                 isOpen: next,
-            }));
+            }))
         }
 
-        setTogglingOpen(false);
-    };
+        setTogglingOpen(false)
+    }
 
-    const brandName = restaurant.name || "MenuFlow";
+    const brandName = restaurant.name || "MenuFlow"
 
     /* ---------- تنبيهات الطلبات الجديدة ---------- */
-    const [soundEnabled, setSoundEnabled] = useState(readSoundPreference);
-    const [isDarkMode, setIsDarkMode] = useState(readThemePreference);
+    const [soundEnabled, setSoundEnabled] = useState(readSoundPreference)
+    const [isDarkMode, setIsDarkMode] = useState(readThemePreference)
 
     useEffect(() => {
-        document.documentElement.classList.toggle("dark", isDarkMode);
+        document.documentElement.classList.toggle("dark", isDarkMode)
         try {
-            localStorage.setItem(THEME_KEY, isDarkMode ? "dark" : "light");
+            localStorage.setItem(THEME_KEY, isDarkMode ? "dark" : "light")
         } catch {
             // ignore
         }
-    }, [isDarkMode]);
+    }, [isDarkMode])
 
     // لو المستخدم خرج من لوحة الأدمن (مثلاً لصفحة تسجيل الدخول أو منيو
     // مطعم في نفس التبويب)، نشيل كلاس الوضع الليلي عشان ما يأثرش
     // على صفحات تانية مالهاش علاقة بالوضع الليلي
     useEffect(() => {
         return () => {
-            document.documentElement.classList.remove("dark");
-        };
-    }, []);
+            document.documentElement.classList.remove("dark")
+        }
+    }, [])
 
     const toggleTheme = () => {
-        setIsDarkMode((current) => !current);
-    };
-    const [audioReady, setAudioReady] = useState(false);
-    const [toasts, setToasts] = useState([]);
+        setIsDarkMode((current) => !current)
+    }
+    const [audioReady, setAudioReady] = useState(false)
+    const [toasts, setToasts] = useState([])
 
     const dismissToast = (id) => {
-        setToasts((current) => current.filter((toast) => toast.id !== id));
-    };
+        setToasts((current) =>
+            current.filter((toast) => toast.id !== id)
+        )
+    }
 
     const handleNewOrder = (order) => {
-        setToasts((current) => [order, ...current].slice(0, 3));
+        setToasts((current) => [order, ...current].slice(0, 3))
 
-        setTimeout(() => dismissToast(order.id), 20000);
+        setTimeout(() => dismissToast(order.id), 20000)
 
         if (soundEnabled) {
             playOrderSound().then((played) => {
-                if (!played) setAudioReady(false);
-            });
+                if (!played) setAudioReady(false)
+            })
         }
 
         if (navigator.vibrate) {
-            navigator.vibrate([200, 100, 200]);
+            navigator.vibrate([200, 100, 200])
         }
 
         if (
@@ -268,29 +292,29 @@ function AdminLayout() {
             new Notification("طلب جديد 🔔", {
                 body: `${order.order_number || ""} — ${describeOrder(order)}`,
                 tag: order.id,
-            });
+            })
         }
-    };
+    }
 
     // العميل ألغى طلبه: تنبيه عشان المطعم ما يجهّزوش
     const handleCustomerCancel = (order) => {
-        const toastId = `cancel-${order.id}`;
+        const toastId = `cancel-${order.id}`
 
         setToasts((current) =>
             [
                 { ...order, id: toastId, orderId: order.id, kind: "cancel" },
                 ...current,
-            ].slice(0, 3),
-        );
+            ].slice(0, 3)
+        )
 
-        setTimeout(() => dismissToast(toastId), 30000);
+        setTimeout(() => dismissToast(toastId), 30000)
 
         if (soundEnabled) {
-            playOrderSound({ repeat: 2 });
+            playOrderSound({ repeat: 2 })
         }
 
         if (navigator.vibrate) {
-            navigator.vibrate([400, 150, 400]);
+            navigator.vibrate([400, 150, 400])
         }
 
         if (
@@ -301,92 +325,96 @@ function AdminLayout() {
             new Notification("العميل ألغى الطلب ❌", {
                 body: `${order.order_number || ""}${order.cancel_reason ? ` — ${order.cancel_reason}` : ""}`,
                 tag: toastId,
-            });
+            })
         }
-    };
+    }
 
     const { pendingCount, realtimeStatus } = useNewOrderAlerts({
         restaurantId,
         enabled: Boolean(session) && Boolean(restaurantId),
         onNewOrder: handleNewOrder,
         onCustomerCancel: handleCustomerCancel,
-    });
+    })
 
     // أول ضغطة في الصفحة تفعّل الصوت (شرط من المتصفحات)
     useEffect(() => {
-        let active = true;
+        let active = true
 
         const unlock = () => {
             unlockAudio().then((ready) => {
-                if (active && ready) setAudioReady(true);
-            });
-        };
+                if (active && ready) setAudioReady(true)
+            })
+        }
 
-        unlock();
+        unlock()
 
-        window.addEventListener("pointerdown", unlock);
-        window.addEventListener("keydown", unlock);
+        window.addEventListener("pointerdown", unlock)
+        window.addEventListener("keydown", unlock)
 
         return () => {
-            active = false;
-            window.removeEventListener("pointerdown", unlock);
-            window.removeEventListener("keydown", unlock);
-        };
-    }, []);
+            active = false
+            window.removeEventListener("pointerdown", unlock)
+            window.removeEventListener("keydown", unlock)
+        }
+    }, [])
 
     // عدد الطلبات الجديدة في عنوان التبويب
     useEffect(() => {
-        const base = `${brandName} | لوحة التحكم`;
+        const base = `${brandName} | لوحة التحكم`
 
         document.title =
-            pendingCount > 0 ? `(${pendingCount}) طلب جديد — ${base}` : base;
-    }, [pendingCount, brandName]);
+            pendingCount > 0
+                ? `(${pendingCount}) طلب جديد — ${base}`
+                : base
+    }, [pendingCount, brandName])
 
     // أيقونة التبويب = لوجو المطعم
     useEffect(() => {
-        applyBranding({ iconUrl: restaurant.logo });
-    }, [restaurant.logo]);
+        applyBranding({ iconUrl: restaurant.logo })
+    }, [restaurant.logo])
 
     const enableSound = async () => {
-        const ready = await unlockAudio();
+        const ready = await unlockAudio()
 
-        setAudioReady(ready);
+        setAudioReady(ready)
 
         if (ready) {
-            playOrderSound({ repeat: 1 });
+            playOrderSound({ repeat: 1 })
         }
 
         if (
             typeof Notification !== "undefined" &&
             Notification.permission === "default"
         ) {
-            Notification.requestPermission();
+            Notification.requestPermission()
         }
-    };
+    }
 
     const toggleSound = async () => {
-        const next = !soundEnabled;
+        const next = !soundEnabled
 
-        setSoundEnabled(next);
+        setSoundEnabled(next)
 
         try {
-            localStorage.setItem(SOUND_KEY, next ? "on" : "off");
+            localStorage.setItem(SOUND_KEY, next ? "on" : "off")
         } catch {
             // ignore
         }
 
         if (next) {
-            await enableSound();
+            await enableSound()
         }
-    };
+    }
 
     const realtimeLabel =
-        realtimeStatus === "SUBSCRIBED" ? "🟢 تنبيهات لحظية" : "🟡 فحص كل 15 ثانية";
+        realtimeStatus === "SUBSCRIBED"
+            ? "🟢 تنبيهات لحظية"
+            : "🟡 فحص كل 15 ثانية"
 
     const handleLogout = async () => {
-        await supabase.auth.signOut();
-        navigate("/admin/login");
-    };
+        await supabase.auth.signOut()
+        navigate("/admin/login")
+    }
 
     const navItems = [
         { label: "الرئيسية", path: "/admin", icon: "🏠" },
@@ -399,11 +427,11 @@ function AdminLayout() {
             path: "/admin/settings",
             icon: "⚙️",
         },
-    ];
+    ]
 
     const closeMobileMenu = () => {
-        setMobileMenuOpen(false);
-    };
+        setMobileMenuOpen(false)
+    }
 
     if (session === undefined) {
         return (
@@ -413,33 +441,37 @@ function AdminLayout() {
             >
                 <p className="opacity-60">جاري التحميل...</p>
             </div>
-        );
+        )
     }
 
     if (!session) {
-        return <Navigate to="/admin/login" replace />;
+        return <Navigate to="/admin/login" replace />
     }
 
     // لوحة تحكم المطاعم دي لأصحاب المطاعم بس؛ صاحب المنصة له لوحته الخاصة
     if (authData?.role === "super_admin") {
-        return <Navigate to="/super-admin" replace />;
+        return <Navigate to="/super-admin" replace />
     }
 
     // أي حساب متسجل دخول بس مالوش صف "admin" حقيقي في user_roles
     // (يعني مش صاحب مطعم فعلي) بنرجّعه لصفحة تسجيل الدخول
     if (authData && authData.role !== "admin") {
-        return <Navigate to="/admin/login" replace />;
+        return <Navigate to="/admin/login" replace />
     }
 
     const ordersBadge = pendingCount > 0 && (
         <span className="absolute -top-1.5 -right-2 min-w-5 h-5 px-1 rounded-full bg-red-600 text-white text-[11px] font-bold flex items-center justify-center">
             {pendingCount > 99 ? "99+" : pendingCount}
         </span>
-    );
+    )
 
     return (
-        <div dir="rtl" className="min-h-screen bg-(--color-background)">
+        <div
+            dir="rtl"
+            className="min-h-screen bg-(--color-background)"
+        >
             <div className="min-h-screen">
+
                 {/* =====================================================
                     Desktop Sidebar
                     - ثابت يمين الشاشة
@@ -465,9 +497,12 @@ function AdminLayout() {
                         group
                     "
                 >
+
                     {/* Logo */}
                     <div className="h-22 px-3 border-b flex items-center">
+
                         <div className="flex items-center gap-3 min-w-max">
+
                             <BrandMark
                                 logo={restaurant.logo}
                                 name={brandName}
@@ -475,15 +510,22 @@ function AdminLayout() {
                             />
 
                             <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
-                                <h1 className="font-bold text-lg">{brandName}</h1>
+                                <h1 className="font-bold text-lg">
+                                    {brandName}
+                                </h1>
 
-                                <p className="text-xs opacity-50">لوحة التحكم</p>
+                                <p className="text-xs opacity-50">
+                                    لوحة التحكم
+                                </p>
                             </div>
+
                         </div>
+
                     </div>
 
                     {/* Navigation */}
                     <nav className="flex-1 p-3 space-y-2">
+
                         {navItems.map((item) => (
                             <NavLink
                                 key={item.path}
@@ -499,7 +541,8 @@ function AdminLayout() {
                             >
                                 <span className="relative w-6 shrink-0 text-lg text-center">
                                     {item.icon}
-                                    {item.path === "/admin/orders" && ordersBadge}
+                                    {item.path === "/admin/orders" &&
+                                        ordersBadge}
                                 </span>
 
                                 <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -507,10 +550,12 @@ function AdminLayout() {
                                 </span>
                             </NavLink>
                         ))}
+
                     </nav>
 
                     {/* Open / Closed toggle */}
                     <div className="px-3 pb-2">
+
                         <button
                             type="button"
                             onClick={toggleOpen}
@@ -528,22 +573,30 @@ function AdminLayout() {
 
                             <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-right">
                                 <span className="block text-sm">
-                                    {restaurant.isOpen ? "المطعم مفتوح" : "المطعم مغلق"}
+                                    {restaurant.isOpen
+                                        ? "المطعم مفتوح"
+                                        : "المطعم مغلق"}
                                 </span>
                                 <span className="block text-xs opacity-60">
-                                    {restaurant.isOpen ? "اضغط للإغلاق" : "اضغط للفتح"}
+                                    {restaurant.isOpen
+                                        ? "اضغط للإغلاق"
+                                        : "اضغط للفتح"}
                                 </span>
                             </span>
                         </button>
+
                     </div>
 
                     {/* Sound toggle */}
                     <div className="px-3 pb-2">
+
                         <button
                             type="button"
                             onClick={toggleSound}
                             title={
-                                soundEnabled ? "إيقاف صوت التنبيهات" : "تشغيل صوت التنبيهات"
+                                soundEnabled
+                                    ? "إيقاف صوت التنبيهات"
+                                    : "تشغيل صوت التنبيهات"
                             }
                             className="w-full flex items-center gap-3 h-12 px-3 rounded-xl font-medium hover:bg-(--color-background) transition-colors duration-200 whitespace-nowrap"
                         >
@@ -553,21 +606,29 @@ function AdminLayout() {
 
                             <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-right">
                                 <span className="block text-sm">
-                                    {soundEnabled ? "صوت التنبيه: شغال" : "صوت التنبيه: مقفول"}
+                                    {soundEnabled
+                                        ? "صوت التنبيه: شغال"
+                                        : "صوت التنبيه: مقفول"}
                                 </span>
                                 <span className="block text-xs opacity-60">
                                     {realtimeLabel}
                                 </span>
                             </span>
                         </button>
+
                     </div>
 
                     {/* Dark mode toggle */}
                     <div className="px-3 pb-2">
+
                         <button
                             type="button"
                             onClick={toggleTheme}
-                            title={isDarkMode ? "الوضع الفاتح" : "الوضع الليلي"}
+                            title={
+                                isDarkMode
+                                    ? "الوضع الفاتح"
+                                    : "الوضع الليلي"
+                            }
                             className="w-full flex items-center gap-3 h-12 px-3 rounded-xl font-medium hover:bg-(--color-background) transition-colors duration-200 whitespace-nowrap"
                         >
                             <span className="w-6 shrink-0 text-lg text-center">
@@ -580,23 +641,29 @@ function AdminLayout() {
                                 </span>
                             </span>
                         </button>
+
                     </div>
 
                     {/* Logout */}
                     <div className="p-3 border-t">
+
                         <button
                             type="button"
                             onClick={handleLogout}
                             title="تسجيل الخروج"
                             className="w-full flex items-center gap-3 h-12 px-3 rounded-xl font-medium text-red-600 hover:bg-red-50 transition-colors duration-200 whitespace-nowrap"
                         >
-                            <span className="w-6 shrink-0 text-lg text-center">🚪</span>
+                            <span className="w-6 shrink-0 text-lg text-center">
+                                🚪
+                            </span>
 
                             <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                 تسجيل الخروج
                             </span>
                         </button>
+
                     </div>
+
                 </aside>
 
                 {/* =====================================================
@@ -631,10 +698,14 @@ function AdminLayout() {
                         }
                     `}
                 >
+
                     {/* Mobile Header */}
-                    <div className="p-5 border-b">
+                    <div className="p-5 border-b shrink-0">
+
                         <div className="flex items-center justify-between gap-3">
+
                             <div className="flex items-center gap-3">
+
                                 <BrandMark
                                     logo={restaurant.logo}
                                     name={brandName}
@@ -642,10 +713,15 @@ function AdminLayout() {
                                 />
 
                                 <div>
-                                    <h1 className="font-bold text-lg">{brandName}</h1>
+                                    <h1 className="font-bold text-lg">
+                                        {brandName}
+                                    </h1>
 
-                                    <p className="text-xs opacity-50">لوحة التحكم</p>
+                                    <p className="text-xs opacity-50">
+                                        لوحة التحكم
+                                    </p>
                                 </div>
+
                             </div>
 
                             <button
@@ -655,19 +731,19 @@ function AdminLayout() {
                             >
                                 ✕
                             </button>
+
                         </div>
+
                     </div>
 
                     {/* Mobile Navigation */}
-                    <nav className="
-                            flex-1
-                            min-h-0
-                            overflow-y-auto
-                            overscroll-contain
-                            p-4
-                            space-y-2
+                    <nav
+                        className="
+                            flex-1 min-h-0 overflow-y-auto overscroll-contain
+                            p-4 space-y-2
                         "
                     >
+
                         {navItems.map((item) => (
                             <NavLink
                                 key={item.path}
@@ -681,87 +757,120 @@ function AdminLayout() {
                                     }`
                                 }
                             >
-                                <span className="text-lg">{item.icon}</span>
+                                <span className="text-lg">
+                                    {item.icon}
+                                </span>
 
-                                <span className="flex-1">{item.label}</span>
+                                <span className="flex-1">
+                                    {item.label}
+                                </span>
 
-                                {item.path === "/admin/orders" && pendingCount > 0 && (
-                                    <span className="min-w-6 h-6 px-1.5 rounded-full bg-red-600 text-white text-xs font-bold flex items-center justify-center">
-                                        {pendingCount > 99 ? "99+" : pendingCount}
-                                    </span>
-                                )}
+                                {item.path === "/admin/orders" &&
+                                    pendingCount > 0 && (
+                                        <span className="min-w-6 h-6 px-1.5 rounded-full bg-red-600 text-white text-xs font-bold flex items-center justify-center">
+                                            {pendingCount > 99
+                                                ? "99+"
+                                                : pendingCount}
+                                        </span>
+                                    )}
                             </NavLink>
                         ))}
+
                     </nav>
 
                     {/* Mobile open / closed toggle */}
-                    <div className="px-4 pb-2">
+                    <div className="px-4 pb-2 shrink-0">
+
                         <button
                             type="button"
                             onClick={toggleOpen}
                             disabled={togglingOpen || !restaurant.settingsId}
                             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium hover:bg-(--color-background) transition text-right disabled:opacity-50"
                         >
-                            <span className="text-lg">{restaurant.isOpen ? "🟢" : "🔴"}</span>
+                            <span className="text-lg">
+                                {restaurant.isOpen ? "🟢" : "🔴"}
+                            </span>
 
                             <span>
                                 <span className="block">
-                                    {restaurant.isOpen ? "المطعم مفتوح" : "المطعم مغلق"}
+                                    {restaurant.isOpen
+                                        ? "المطعم مفتوح"
+                                        : "المطعم مغلق"}
                                 </span>
                                 <span className="block text-xs opacity-60">
-                                    {restaurant.isOpen ? "اضغط للإغلاق" : "اضغط للفتح"}
+                                    {restaurant.isOpen
+                                        ? "اضغط للإغلاق"
+                                        : "اضغط للفتح"}
                                 </span>
                             </span>
                         </button>
+
                     </div>
 
                     {/* Mobile sound toggle */}
-                    <div className="px-4 pb-2">
+                    <div className="px-4 pb-2 shrink-0">
+
                         <button
                             type="button"
                             onClick={toggleSound}
                             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium hover:bg-(--color-background) transition text-right"
                         >
-                            <span className="text-lg">{soundEnabled ? "🔔" : "🔕"}</span>
+                            <span className="text-lg">
+                                {soundEnabled ? "🔔" : "🔕"}
+                            </span>
 
                             <span>
                                 <span className="block">
-                                    {soundEnabled ? "صوت التنبيه: شغال" : "صوت التنبيه: مقفول"}
+                                    {soundEnabled
+                                        ? "صوت التنبيه: شغال"
+                                        : "صوت التنبيه: مقفول"}
                                 </span>
                                 <span className="block text-xs opacity-60">
                                     {realtimeLabel}
                                 </span>
                             </span>
                         </button>
+
                     </div>
 
                     {/* Mobile dark mode toggle */}
-                    <div className="px-4 pb-2">
+                    <div className="px-4 pb-2 shrink-0">
+
                         <button
                             type="button"
                             onClick={toggleTheme}
                             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium hover:bg-(--color-background) transition text-right"
                         >
-                            <span className="text-lg">{isDarkMode ? "☀️" : "🌙"}</span>
+                            <span className="text-lg">
+                                {isDarkMode ? "☀️" : "🌙"}
+                            </span>
 
                             <span className="block">
                                 {isDarkMode ? "الوضع الفاتح" : "الوضع الليلي"}
                             </span>
                         </button>
+
                     </div>
 
                     {/* Mobile Logout */}
-                    <div className="p-4 border-t">
+                    <div className="p-4 border-t shrink-0">
+
                         <button
                             type="button"
                             onClick={handleLogout}
                             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-red-600 hover:bg-red-50 transition"
                         >
-                            <span className="text-lg">🚪</span>
+                            <span className="text-lg">
+                                🚪
+                            </span>
 
-                            <span>تسجيل الخروج</span>
+                            <span>
+                                تسجيل الخروج
+                            </span>
                         </button>
+
                     </div>
+
                 </aside>
 
                 {/* =====================================================
@@ -770,8 +879,10 @@ function AdminLayout() {
                     72px مساحة للـSidebar
                 ===================================================== */}
                 <main className="md:mr-18 min-w-0">
+
                     {/* Mobile Header */}
                     <div className="md:hidden sticky top-0 z-30 h-16 bg-(--color-card) border-b flex items-center justify-between px-4">
+
                         <button
                             type="button"
                             onClick={() => setMobileMenuOpen(true)}
@@ -782,12 +893,15 @@ function AdminLayout() {
                         </button>
 
                         <div className="flex items-center gap-2">
+
                             <button
                                 type="button"
                                 onClick={toggleOpen}
                                 disabled={togglingOpen || !restaurant.settingsId}
                                 aria-label="فتح أو إغلاق المطعم"
-                                className={`h-8 px-2.5 rounded-full text-xs font-bold text-white flex items-center gap-1 disabled:opacity-50 ${restaurant.isOpen ? "bg-green-600" : "bg-red-600"
+                                className={`h-8 px-2.5 rounded-full text-xs font-bold text-white flex items-center gap-1 disabled:opacity-50 ${restaurant.isOpen
+                                    ? "bg-green-600"
+                                    : "bg-red-600"
                                     }`}
                             >
                                 <span className="w-1.5 h-1.5 rounded-full bg-white" />
@@ -823,13 +937,19 @@ function AdminLayout() {
                                 className="w-9 h-9 rounded-lg text-sm"
                             />
 
-                            <span className="font-bold max-w-24 truncate">{brandName}</span>
+                            <span className="font-bold max-w-24 truncate">
+                                {brandName}
+                            </span>
+
                         </div>
+
                     </div>
 
                     {/* 🔥 تمرير الـ context لجميع العناصر الابنة مثل AdminProducts */}
                     <Outlet context={{ authData, restaurant, session }} />
+
                 </main>
+
             </div>
 
             {/* =====================================================
@@ -837,6 +957,7 @@ function AdminLayout() {
             ===================================================== */}
             {toasts.length > 0 && (
                 <div className="fixed top-4 left-1/2 -translate-x-1/2 z-80 w-[calc(100%-2rem)] max-w-sm space-y-3">
+
                     {toasts.map((toast) => (
                         <div
                             key={toast.id}
@@ -846,25 +967,32 @@ function AdminLayout() {
                                 : "border-(--color-success)"
                                 }`}
                         >
+
                             <div className="flex items-start justify-between gap-3">
+
                                 <div>
+
                                     <p className="font-bold text-lg">
                                         {toast.kind === "cancel"
                                             ? "❌ العميل ألغى الطلب"
                                             : "🔔 طلب جديد!"}
                                     </p>
 
-                                    <p className="font-semibold mt-1">{toast.order_number}</p>
+                                    <p className="font-semibold mt-1">
+                                        {toast.order_number}
+                                    </p>
 
                                     <p className="text-sm opacity-70 mt-1">
                                         {describeOrder(toast)}
                                     </p>
 
-                                    {toast.kind === "cancel" && toast.cancel_reason && (
-                                        <p className="text-sm text-red-700 mt-2">
-                                            السبب: {toast.cancel_reason}
-                                        </p>
-                                    )}
+                                    {toast.kind === "cancel" &&
+                                        toast.cancel_reason && (
+                                            <p className="text-sm text-red-700 mt-2">
+                                                السبب: {toast.cancel_reason}
+                                            </p>
+                                        )}
+
                                 </div>
 
                                 <button
@@ -875,22 +1003,28 @@ function AdminLayout() {
                                 >
                                     ✕
                                 </button>
+
                             </div>
 
                             <button
                                 type="button"
                                 onClick={() => {
-                                    const targetOrderId = toast.orderId || toast.id;
+                                    const targetOrderId =
+                                        toast.orderId || toast.id
 
-                                    dismissToast(toast.id);
-                                    navigate(`/admin/orders?order=${targetOrderId}`);
+                                    dismissToast(toast.id)
+                                    navigate(
+                                        `/admin/orders?order=${targetOrderId}`
+                                    )
                                 }}
                                 className="w-full mt-3 bg-(--color-primary) text-white py-2.5 rounded-xl font-medium"
                             >
                                 عرض الطلبات
                             </button>
+
                         </div>
                     ))}
+
                 </div>
             )}
 
@@ -907,7 +1041,7 @@ function AdminLayout() {
                 </div>
             )}
         </div>
-    );
+    )
 }
 
-export default AdminLayout;
+export default AdminLayout
